@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLINDSPOT - Dual-Meta Protokoll</title>
+    <style>
+        /* A kritikus javítás: minden elem szélessége tartalmazza a keretet is */
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg: #050505; --card: #0d0d0d; --agent-ui: #0088ff;
+            --phantom-ui: #ff3300;
+            --text-main: #d0d0d0; --border: #222;
+        }
+        
+        body { 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+
+        .container { 
+            background: var(--card); 
+            padding: 30px; 
+            border: 1px solid var(--border); 
+            width: 360px; 
+            max-width: 95%; /* Mobilbarát fix */
+            box-shadow: 0 0 50px rgba(0,0,0,1); 
+        }
+
+        h1 { font-size: 1.5rem; letter-spacing: 5px; margin: 0; color: #fff; text-align: center; }
+        .sub-header { font-size: 0.6rem; color: #444; text-align: center; margin-bottom: 20px; }
+        
+        button { 
+            width: 100%; 
+            padding: 16px; 
+            background: #111; 
+            border: 1px solid #333; 
+            color: #fff; 
+            cursor: pointer; 
+            font-family: inherit; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            margin-top: 15px; 
+            transition: all 0.3s ease;
+        }
+        button:hover:not(.disabled) { background: #1a1a1a; border-color: #555; }
+        
+        /* Új stílus a letiltott gombhoz */
+        button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+            background: #050505;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            text-align: center;
+            font-family: inherit;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .dossier { background: #000; padding: 20px; border: 1px solid #1a1a1a; margin: 15px 0; }
+        .role-label { font-size: 0.7rem; color: #555; text-transform: uppercase; margin-bottom: 5px; }
+        .role-val { font-size: 1.3rem; font-weight: bold; margin-bottom: 15px; display: block; }
+        .word-box { font-size: 1.4rem; font-weight: bold; color: #fff; padding: 12px; background: #080808; border-left: 3px solid #333; margin-bottom: 10px; }
+        .meta-box { border: 1px dashed var(--phantom-ui); padding: 15px; background: rgba(255, 51, 0, 0.05); }
+        .meta-title { font-size: 0.7rem; color: var(--phantom-ui); font-weight: bold; margin-bottom: 10px; display: block; }
+        .meta-tag { font-size: 0.9rem; color: #fff; margin: 8px 0; padding: 10px; border: 1px solid #222; text-align: center; background: #000; font-weight: bold; }
+        
+        .clr-agent { color: var(--agent-ui); } 
+        .clr-phantom { color: var(--phantom-ui); } 
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="scr-start" class="container">
+        <h1>BLINDSPOT</h1>
+        <div class="sub-header">SYSTEM READY // 200+ ENTRIES LOADED</div>
+        <p style="font-size: 0.8rem; margin-top: 30px;">Résztvevők száma (3-12):</p>
+        <input type="number" id="pCount" value="4" min="3" max="12">
+        <button onclick="init()">ADATBÁZIS INDÍTÁSA</button>
+    </div>
+
+    <div id="scr-game" class="container hidden">
+        <div id="pNum" style="font-size:0.7rem; color:#333; margin-bottom:10px;">ID: 001</div>
+        <div id="file" class="dossier hidden">
+            <div class="role-label">Besorolás:</div>
+            <div id="rName" class="role-val"></div>
+            <div id="normal-word">
+                <div class="role-label">Kulcsszó:</div>
+                <div id="sWord" class="word-box"></div>
+            </div>
+            <div id="phantom-meta" class="meta-box hidden">
+                <span class="meta-title">⚠️ ELFOGOTT JELEK (DUÁL-META):</span>
+                <div id="meta-tags"></div>
+            </div>
+            <div id="mDesc" style="font-size: 0.75rem; color: #666; margin-top: 15px; border-top: 1px solid #111; padding-top: 10px; line-height: 1.3;"></div>
+        </div>
+        <button id="btnShow" onclick="reveal()">AKTA MEGTEKINTÉSE</button>
+        <button id="btnNext" class="hidden" onclick="next()">AKTA ZÁRÁSA ÉS TOVÁBB</button>
+    </div>
+
+    <div id="scr-brief" class="container hidden">
+        <h1>MŰVELET</h1>
+        <div class="sub-header">PHASE: INTERROGATION</div>
+        <div style="font-size: 0.85rem; line-height: 1.6; text-align: left;">
+            • Sorban mondjatok <b>EGYETLEN</b> rövid utalást.<br>
+            • <span class="clr-agent">ÜGYNÖKÖK:</span> Szavazzátok ki a Fantomot!<br>
+            • <span class="clr-phantom">FANTOM:</span> Használd a 2 meta-adatot a blöffhöz, vagy találd ki a szót!
+        </div>
+        <button onclick="location.reload()">ÚJ AKTÁK</button>
+    </div>
+
+<script>
+    const db = [
+        ["BeReal", ["KÉPMEGOSZTÁS", "PILLANAT"]],
+        ["Tinder", ["TÁRSKERESŐ", "SWIPE"]],
+        ["Monster", ["ENERGIAITAL", "PÖRGET"]],
+        ["Air Force 1", ["SNEAKER", "NIKE"]],
+        ["Shein", ["RENDELÉS", "OLCSÓ"]],
+        ["Oversized póló", ["STÍLUS", "RUHADARAB"]],
+        ["Valorant", ["LÖVÖLDÖZŐS", "E-SPORT"]],
+        ["League of Legends", ["MOBA", "KATTINTÁS"]],
+        ["Minecraft", ["KOCKA", "ÉPÍTÉS"]],
+        ["PlayStation 5", ["KONZOL", "KONTROLLER"]],
+        ["Twitch", ["STREAM", "ÉLŐ"]],
+        ["Discord", ["SZOBÁK", "BESZÉLGETÉS"]],
+        ["ChatGPT", ["MESTERSÉGES", "INTELLIGENCIA"]],
+        ["Bubble tea", ["ITAL", "TRENDI"]],
+        ["Starbucks", ["KÁVÉZÓ", "DRÁGA"]],
+        ["Sushi", ["ÁZSIAI", "ÉTEL"]],
+        ["Protein", ["EDZÉS", "POR"]],
+        ["Vape", ["FÜST", "ÍZESÍTETT"]],
+        ["Sziget", ["FESZTIVÁL", "ZENE"]],
+        ["Érettségi", ["VIZSGA", "STRESSZ"]],
+        ["ZH", ["EGYETEM", "SZÁMONKÉRÉS"]],
+        ["Kolesz", ["KÖLTÖZÉS", "LAKHATÁS"]],
+        ["Neptun", ["ISKOLA", "RENDSZER"]],
+        ["Diákhitel", ["EGYETEM", "PÉNZ"]],
+        ["Menzás kaja", ["SULI", "EVÉS"]],
+        ["Red flag", ["ISMERKEDÉS", "JELZÉS"]],
+        ["Ghosting", ["KAPCSOLAT", "TALÁLKOZÓ"]],
+        ["Crush", ["SZERELEM", "MÚLT"]],
+        ["Friendzone", ["KAPCSOLAT", "STÁTUSZ"]],
+        ["Reels", ["RÖVID", "VIDEÓ"]],
+        ["Influenszer", ["TARTALOMGYÁRTÓ", "INTERNET"]],
+        ["Vlogger", ["VIDEÓ", "ÉLET"]],
+        ["Podcast", ["HALLGATÁS", "FÜLHALLGATÓ"]],
+        ["K-pop", ["ZENE", "MŰFAJ"]],
+        ["Techno", ["ELEKTRONIKUS", "BULI"]],
+        ["Anime", ["JAPÁN", "RAJZ"]],
+        ["Marvel", ["SZUPERHŐS", "UNIVERZUM"]],
+        ["AirPods", ["FÜLES", "VEZETÉK NÉLKÜLI"]],
+        ["Okosóra", ["CSUKLÓ", "MÉRÉS"]],
+        ["Powerbank", ["AKKUMULÁTOR", "ENERGIA"]],
+        ["BKV bérlet", ["KÖZLEKEDÉS", "IGAZOLVÁNY"]],
+        ["Diákmunka", ["PÉNZKERESÉS", "TAPASZTALAT"]],
+        ["Műköröm", ["SZÉPSÉG", "SZALON"]],
+        ["Borbély", ["HAJ", "VÁGÁS"]],
+        ["Kézműves sör", ["ALKOHOL", "NYÁR"]],
+        ["Vodka szóda", ["KOKTÉL", "BULI"]],
+        ["Jägermeister", ["FÜTYÜLŐS", "RÖVIDITAL"]],
+        ["Olimpia", ["SPORT", "KÖZVETÍTÉS"]],
+        ["Kondi", ["EDZÉS", "SÚLYZÓ"]],
+        ["Csaló nap", ["DIÉTA", "FITNESS"]],
+        ["Házibuli", ["HÉTVÉGE", "ZENE"]],
+        ["Másnaposság", ["BULI UTÁN", "ROSSZULLÉT"]],
+        ["Meki", ["GYORSÉTEL", "CSIRKE"]],
+        ["Doritos", ["CHIPS", "RAGACSOS"]],
+        ["Vegan", ["DIÉTA", "MENTES"]],
+        ["Zara", ["FAST FASHION", "PLÁZA"]],
+        ["Gucci", ["LUXUS", "DRÁGA"]],
+        ["Vinted", ["HASZNÁLT", "ELADÁS"]],
+        ["Cargo nadrág", ["RUHA", "ZSEBES"]],
+        ["Bucket hat", ["FEJ", "KIEGÉSZÍTŐ"]],
+        ["Tiktok tánc", ["VIDEÓ", "NÉPSZERŰ"]],
+        ["Mém", ["VICC", "KÜLDÉS"]],
+        ["Matrica", ["ÜZENET", "REAKCIÓ"]],
+        ["DM (Direct Message)", ["INSTA", "SZÖVEG"]],
+        ["Like", ["GOMB", "INTERAKCIÓ"]],
+        ["Follower", ["KÖZÖNSÉG", "SZÁM"]],
+        ["Block", ["TILTÁS", "KÖZÖSSÉGI MÉDIA"]],
+        ["Hacker", ["KÓD", "GÉP"]],
+        ["Kripto", ["DIGITÁLIS", "BEFEKTETÉS"]],
+        ["Bitcoin", ["VALUTA", "COIN"]],
+        ["Wolt", ["RENDELÉS", "FUTÁR"]],
+        ["Revolut", ["FIZETÉS", "KÁRTYA"]],
+        ["HBO Max", ["STREAMING", "ELŐFIZETÉS"]],
+        ["Mozi", ["FILMNÉZÉS", "POPCORN"]],
+        ["Fesztivál", ["ÉLŐ", "TÖMEG"]],
+        ["Binge watching", ["SOROZAT", "EGYHUZAMBAN"]],
+        ["Spoiler", ["FILM", "INFORMÁCIÓ"]],
+        ["Vlog", ["KAMERA", "ÉLET"]],
+        ["Selfie", ["FOTÓ", "ARC"]],
+        ["Filter", ["SZERKESZTÉS", "KÉP"]],
+        ["Képernyőfotó", ["MENTÉS", "BIZONYÍTÉK"]],
+        ["Wifi", ["KAPCSOLAT", "ADAT"]],
+        ["Bluetooth", ["MEGOSZTÁS", "VEZETÉK NÉLKÜL"]],
+        ["Értesítés", ["HANG", "TELEFON"]],
+        ["Rezgés", ["BEÁLLÍTÁS", "MOBIL"]],
+        ["Töltő", ["AKKU", "FALBA DUGOD"]],
+        ["Piknik", ["KINT", "KOSÁR"]],
+        ["Túra", ["TERMÉSZET", "SÁTOR"]],
+        ["Gördeszka", ["PARK", "TRÜKK"]],
+        ["Roller", ["BÉRLÉS", "VÁROS"]],
+        ["Oszkár", ["UTAZÁS", "OLCSÓ"]],
+        ["Repülőjegy", ["NYARALÁS", "FOGLALÁS"]],
+        ["Hostel", ["ALVÁS", "KÜLFÖLD"]],
+        ["Görögország", ["NYÁR", "TENGER"]],
+        ["Síbérlet", ["TÉL", "HEGYEK"]],
+        ["Korcsolya", ["JÉG", "CSÚSZIK"]],
+        ["Szemüvegkeret", ["LÁTÁS", "DIVAT"]],
+        ["Fültágító", ["PIERCING", "LYUK"]],
+        ["Tetkó", ["BŐR", "MINTA"]],
+        ["Hajfesték", ["FODRÁSZ", "VÁLTOZÁS"]],
+        ["Smink", ["ARC", "KOZMETIKA"]],
+        ["Alapozó", ["SMINK", "FEDÉS"]],
+        ["Parfüm", ["ILLAT", "FÚJÁS"]],
+        ["Edzőcipő", ["LÁBBELI", "ALKALOM"]],
+        ["Kézmosó", ["BACIK", "TISZTASÁG"]],
+        ["Maszk", ["VÉDELEM", "COVID"]],
+        ["Oltás", ["IMMUNRENDSZER", "TŰ"]],
+        ["Láz", ["BETEGSÉG", "TÜNET"]],
+        ["Allergia", ["LÉGZÉS", "TAVASZ"]],
+        ["Szemcsepp", ["GYÓGYSZERTÁR", "FOLYADÉK"]],
+        ["Fájdalomcsillapító", ["FEJFÁJÁS", "BOGYÓ"]],
+        ["Gipsz", ["TÖRÉS", "KÓRHÁZ"]],
+        ["Plasztika", ["BEAVATKOZÁS", "SZÉPSÉG"]],
+        ["Diéta", ["FOGYÁS", "KALÓRIA"]],
+        ["Kondi bérlet", ["TEREM", "MOTIVÁCIÓ"]],
+        ["Jóga matrac", ["ESZKÖZ", "OTTHONI EDZÉS"]],
+        ["Bicikliút", ["KÖZLEKEDÉS", "FESTÉS"]],
+        ["Jogosítvány", ["AUTÓ", "PAPÍR"]],
+        ["Kuplung", ["LÁB", "VEZETÉS"]],
+        ["Kézfém", ["AUTÓ", "KEZELÉS"]],
+        ["Index", ["LÁMPA", "VILLOG"]],
+        ["Traffipax", ["BÜNTETÉS", "GYORSHAJTÁS"]],
+        ["Parkolójegy", ["SZÉLVÉDŐ", "MIKULÁSCSOMAG"]],
+        ["Benzin", ["KÚT", "ÜZEMANYAG"]],
+        ["Elektromos autó", ["KÖRNYEZETBARÁT", "TÖLTÉS"]],
+        ["Motor", ["KÉTKEREKŰ", "SISAK"]],
+        ["Bukósisak", ["ESÉS", "VÉDELEM"]],
+        ["Deszkás cipő", ["STÍLUS", "LÁBBELI"]],
+        ["Hátizsák", ["CUCC", "HORDÁS"]],
+        ["Pénztárca", ["FIZETÉS", "ZSEB"]],
+        ["Személyi", ["KÁRTYA", "AZONOSÍTÓ"]],
+        ["Kulcscsomó", ["BEJUTÁS", "AJTÓ"]],
+        ["Riasztó", ["VÉDELEM", "BETÖRŐ"]],
+        ["Jelszó", ["TITKOS", "SZÁMOK"]],
+        ["Ujjlenyomat", ["BIOMETRIKUS", "FELOLDÁS"]],
+        ["Touchpad", ["LAPTOP", "KURZOR"]],
+        ["Billentyűzet", ["PC", "GÉPELÉS"]],
+        ["Alaplap", ["GÉP", "HARDVER"]],
+        ["Processzor", ["SZÁMÍTÓGÉP", "TELJESÍTMÉNY"]],
+        ["Tárhely", ["MENTÉS", "GIGABYTE"]],
+        ["Vírus", ["BIZTONSÁG", "KÁRTEVŐ"]],
+        ["Update", ["SZOFTVER", "FRISSÍTÉS"]],
+        ["Lag", ["AKADÁS", "INTERNET"]],
+        ["Szerver", ["HÁLÓZAT", "KAPCSOLÓDÁS"]],
+        ["Konzol", ["GAMER", "PLATFORM"]],
+        ["VR szemüveg", ["SZIMULÁTOR", "JÁTÉK"]],
+        ["Fejhallgató", ["STREAM", "HANG"]],
+        ["Gamer szék", ["SETUP", "ASZTAL"]],
+        ["RGB világítás", ["SZÍNES", "SZOBA"]],
+        ["Plakát", ["FAL", "DÍSZ"]],
+        ["Bonsai", ["NÖVÉNY", "CSIREPES"]],
+        ["Ikea", ["BÚTOR", "SZERELÉS"]],
+        ["Ágy", ["FEKVÉS", "PIHENÉS"]],
+        ["Takaró", ["ALVÁS", "ÁGY"]],
+        ["Ébresztő", ["REGGEL", "TELEFON"]],
+        ["Kávéfőző", ["KONYHA", "MELEG"]],
+        ["Mikró", ["MELEGÍTÉS", "ÉTEL"]],
+        ["Hűtő", ["HIDEG", "TÁROLÁS"]],
+        ["Mosogatógép", ["TISZTÍTÁS", "GÉP"]],
+        ["Porszívó", ["TAKARÍTÁS", "KOSZ"]],
+        ["Szemetes", ["HULLADÉK", "MŰANYAG"]],
+        ["Sampon", ["HAJMOSÁS", "FÜRDŐ"]],
+        ["Tusfürdő", ["TISZTÁLKODÁS", "HAB"]],
+        ["Fogkefe", ["SZÁJ", "MOSÁS"]],
+        ["Fogselyem", ["FOGORVOS", "TISZTA"]],
+        ["Borotva", ["SZŐR", "ELTÁVOLÍTÁS"]],
+        ["Dezodor", ["HÓNALJ", "ILLAT"]],
+        ["Törölköző", ["SZÁRADÁS", "PUHA"]],
+        ["Hajszárító", ["FRIZURA", "HŐ"]],
+        ["Körömcsipesz", ["KÉZ", "ÁPOLÁS"]],
+        ["Ragasztó", ["JAVÍTÁS", "TART"]],
+        ["Csavarhúzó", ["SZERSZÁM", "BARKÁCS"]],
+        ["Elem", ["ÁRAM", "TÁPEGYSÉG"]],
+        ["Kábelkötegelő", ["VEZETÉK", "DUGALJ"]],
+        ["Villanykörte", ["FÉNY", "LÁMPA"]],
+        ["Távirányító", ["IRÁNYÍTÁS", "KANAPÉ"]],
+        ["Zár", ["BIZTONSÁG", "KULCS"]],
+        ["Pénz", ["FIZETÉS", "FÉM"]],
+        ["Bankkártya", ["MŰANYAG", "VÁSÁRLÁS"]],
+        ["Számla", ["PAPÍR", "BOLT"]],
+        ["Kassza", ["FIZETÉS", "SCANNER"]],
+        ["Bevásárlókocsi", ["CUCCOK", "TOLÓS"]],
+        ["Szatyork", ["HAZAVITEL", "BOLT"]],
+        ["Akció", ["OLCSÓ", "SZÁZALÉK"]],
+        ["Kupon", ["KEDVEZMÉNY", "KÁRTYA"]],
+        ["Pláza", ["VÁSÁRLÁS", "TÖMEG"]],
+        ["Ruhaüzlet", ["ÖLTÖZKÖDÉS", "PRÓBAFÜLKE"]],
+        ["Mozi", ["ELŐADÁS", "JEGY"]],
+        ["Popcorn", ["MOZI", "NASI"]],
+        ["Cola", ["SZÉNSAVAS", "CUKOR"]],
+        ["Jégkocka", ["POHÁR", "HIDEG"]],
+        ["Korsó", ["KOCSMA", "ALKOHOL"]],
+        ["Csapos", ["KISZOLGÁLÁS", "BORRAVALÓ"]],
+        ["Étlap", ["ÉTTEREM", "VÁLASZTÁS"]],
+        ["Asztalfoglalás", ["HELY", "EVÉS"]],
+        ["Kés", ["EVŐESZKÖZ", "FÉM"]],
+        ["Tányér", ["KERÁMIA", "KONYHA"]],
+        ["Szalvéta", ["ASZTAL", "SZÁJ"]],
+        ["Ketchup", ["SZÓSZ", "SÜLTKRUMPLI"]],
+        ["Mustár", ["CSÍPŐS", "VIRSLI"]],
+        ["Só", ["FŰSZER", "SZÓRÁS"]],
+        ["Cukor", ["KÁVÉ", "ÉDES"]],
+        ["Tej", ["DOBOZOS", "KÁVÉBA"]],
+        ["Vaj", ["KENYÉR", "SÁRGA"]],
+        ["Lekvár", ["ÉDES", "REGGELI"]],
+        ["Felvágott", ["SZELET", "SZENDVICS"]],
+        ["Tojás", ["SERPENYŐ", "REGGELI"]],
+        ["Müzli", ["TEJ", "TÁL"]],
+        ["Pékség", ["SÜTEMÉNY", "ILLAT"]],
+        ["Kifli", ["PÉKÁRU", "KEREK/HOSSZÚ"]],
+        ["Pogácsa", ["TÉSZTA", "UZSONNA"]],
+        ["Torta", ["SZÜLINAP", "DESSZERT"]],
+        ["Palacsinta", ["ÉDES", "TÉSZTA"]],
+        ["Csoki", ["ÉDESSÉG", "BOLT"]],
+        ["Rágó", ["LEHELET", "ZSEB"]],
+        ["Chips", ["SÓS", "NASI"]],
+        ["Mogyoró", ["MAGVAK", "BONTÓS"]],
+        ["Gyümölcs", ["EGÉSZSÉGES", "PIAC"]],
+        ["Alma", ["UZSONNA", "HÁMOZÓS"]],
+        ["Eper", ["PIROS", "BOGYÓS"]],
+        ["Citrom", ["SAVANYÚ", "CITRUS"]],
+        ["Dinnye", ["NYÁR", "MAGOK"]],
+        ["Krumpli", ["KÖRET", "FŐZÉS"]],
+        ["Tészta", ["VIZES", "LISZT"]],
+        ["Leves", ["KANÁL", "FŐZELÉK"]],
+        ["Pizza", ["RENDELÉS", "FAST FOOD"]],
+        ["Hot-dog", ["STRAND", "KÉZBEN EVŐS"]],
+        ["Gyros", ["PITÁS", "HAGYMA"]],
+        ["Saláta", ["DIÉTA", "ZÖLD"]],
+        ["Kutya", ["HÁZIÁLLAT", "SIMOGATÁS"]],
+        ["Póráz", ["SÉTA", "KÖTÉL"]],
+        ["Kutyatáp", ["ÁLLATBOLT", "ZSÁK"]],
+        ["Hörcsög", ["KETREC", "RÁGCSÁLÓ"]],
+        ["Madár", ["KALITKA", "AKVÁRIUM"]],
+        ["Állatkert", ["NÉZELŐDÉS", "VADÁLLAT"]],
+        ["Oroszlán", ["NAGYMACSKA", "CSÍKOS/SÖRÉNY"]],
+        ["Elefánt", ["AFRIKA", "NAGY"]],
+        ["Majom", ["FÁNMÁSZÓ", "ÁLLAT"]],
+        ["Kígyó", ["FÓBIA", "MÉREG"]],
+        ["Cápa", ["ÓCEÁN", "FOGAK/MÉRET"]],
+        ["Delfin", ["VÍZI", "ÚSZÁS"]],
+        ["Medve", ["ERDŐ", "RAGADOZÓ"]],
+        ["Róka", ["MEZŐ", "RAVASZ/GYORS"]],
+        ["Szarvas", ["AGANCS", "VADÁSZAT"]],
+        ["Vaddiszno", ["FA", "MAKK"]],
+        ["Bagoly", ["MADÁR", "ÉJSZAKA/VADÁSZ"]],
+        ["Galamb", ["VÁROS", "REPÜL"]],
+        ["Légy", ["ROVAR", "ZAVARÓ"]],
+        ["Hangya", ["MÁSZIK", "KICSI"]],
+        ["Méh", ["CSÍPÉS", "SÁRGA-FEKETE"]],
+        ["Pillangó", ["SZÍNES", "SZÁRNY"]],
+        ["Fű", ["NÖVÉNY", "ZÖLD"]],
+        ["Virág", ["KERT", "ÜLTETÉS"]],
+        ["Rózsa", ["CSOKOR", "AJÁNDÉK"]],
+        ["Napraforgó", ["MEZŐ", "SÁRGA"]],
+        ["Föld", ["TALAJ", "KOSZOS"]],
+        ["Kavics", ["KŐ", "KEMÉNY"]],
+        ["Hegy", ["TÁJ", "MAGAS/MÉLY"]],
+        ["Folyó", ["VÍZ", "ÚSZÁS"]],
+        ["Tenger", ["SÓS", "HULLÁM"]],
+        ["Part", ["HOMOK", "NYARALÁS"]],
+        ["Nap", ["ÉG", "VILÁGÍT"]],
+        ["Csillag", ["ŰR", "TÁVOL"]],
+        ["Felhő", ["IDŐJÁRÁS", "VIHAR"]],
+        ["Eső", ["CSAPADÉK", "ESERNYŐ"]],
+        ["Szél", ["FÚJ", "ERŐS"]],
+        ["Szivárvány", ["LÁTVÁNY", "PÁRA"]],
+        ["Tavasz", ["ÉVSZAK", "ÁTMENET"]],
+        ["Nyár", ["MELEG", "HIDEG"]],
+        ["Hétfő", ["HÉT", "KEZDÉS/VÉGE"]],
+        ["Hétvége", ["PIHENÉS", "NINCS SULI"]],
+        ["Karácsony", ["DECEMBER", "ÜNNEP"]],
+        ["Húsvét", ["TAVASZ", "JELMEZ/TOJÁS"]],
+        ["Halloween", ["AMERIKAI ÜNNEP", "BEÖLTÖZÉS/SZERELEM"]],
+        ["Születésnap", ["ÜNNEPLÉS", "TORTA"]],
+        ["Ajándék", ["CSOMAGOLÁS", "ÖRÖM"]],
+        ["Lufi", ["BULI", "DÍSZLET"]],
+        ["Tűzijáték", ["SZILVESZTER", "DURRANÁS"]],
+        ["Óra", ["IDŐ", "MÚLÁS"]],
+        ["Naptár", ["TERVEZÉS", "DÁTUM"]],
+        ["Reggel", ["NAPSZAK", "SÖTÉT/VILÁGOS"]],
+        ["Éjszaka", ["ALVÁS", "SÖTÉT"]],
+        ["Ma", ["NAP", "JÖVŐ"]],
+        ["Múlt", ["IDŐGÉP", "TÖRTÉNELEM"]],
+        ["Fiú", ["NEM", "EMBER"]],
+        ["Férfi", ["FELNŐTT", "MOSDÓ"]],
+        ["Gyerek", ["KOR", "FELELŐSSÉG"]],
+        ["Baba", ["CSECSEMŐ", "KOROSZTÁLY"]],
+        ["Szülő", ["CSALÁD", "IDŐSEBB"]],
+        ["Testvér", ["ROKON", "KÖZÖS VÉR"]],
+        ["Barát", ["KAPCSOLAT", "BIZALOM"]],
+        ["Osztálytárs", ["KÖZÖS HELY", "ISMERŐS"]],
+        ["Tanár", ["ISKOLA", "FELELÉS"]],
+        ["Főnök", ["MUNKAHELY", "IRÁNYÍTÁS"]],
+        ["Orvos", ["KÓRHÁZ", "GYÓGYÍTÁS"]],
+        ["Rendőr", ["EGYENRUHA", "SEGÍTSÉG"]],
+        ["Mentős", ["SZIRÉNA", "FEGYVER"]],
+        ["Szakács", ["ÉTTEREM", "KONYHA"]],
+        ["Fodrász", ["SZÉPSÉG", "VENDÉG"]],
+        ["Eladó", ["BOLT", "KISZOLGÁLÁS"]],
+        ["Sofőr", ["VEZETÉS", "KORMÁNY"]],
+        ["Színész", ["SZTÁR", "SZÍNPAD"]],
+        ["Író", ["MŰVÉSZ", "ALKOTÁS"]],
+        ["Sportoló", ["VERSENY", "TRÉNING"]],
+        ["Bíró", ["BÍRÓSÁG", "JOG"]],
+        ["Programozó", ["INFORMATIKA", "GÉP"]],
+        ["Influencer", ["INSTAGRAM", "FOTÓ"]],
+        ["Youtuber", ["VIDEÓ", "KÖVETŐK"]],
+        ["Élet", ["LÉTEZÉS", "VÉG"]],
+        ["Egészség", ["ÁLLAPOT", "KÓRHÁZ"]],
+        ["Boldogság", ["ÉRZÉS", "KÖNNY"]],
+        ["Szeretet", ["EMÓCIÓ", "SZÍV"]],
+        ["Harag", ["REAKCIÓ", "ADRENALIN"]],
+        ["Bátorság", ["HŐS", "FUTÁS"]],
+        ["Okos", ["IQ", "AGY"]],
+        ["Erős", ["IZOM", "SÚLY"]],
+        ["Gyors", ["SEBESSÉG", "TEMPÓ"]],
+        ["Szép", ["KÜLSŐ", "ÍZLÉS"]],
+        ["Jó", ["ERKÖLCS", "VÁLASZTÁS"]],
+        ["Igazság", ["MONDÁS", "BÍZÁS"]],
+        ["Titok", ["SUTTOGÁS", "MINDENKI TUDJA"]],
+        ["Vicces", ["NEVETÉS", "ARC"]],
+        ["Hangos", ["HANGERŐ", "FÜL"]],
+        ["Sötét", ["FÉNY", "LÁMPA"]],
+        ["Meleg", ["HŐMÉRSÉKLET", "FOK"]],
+        ["Kemény", ["TAPINTÁS", "ANYAG"]],
+        ["Édes", ["ÍZ", "NYELV"]],
+        ["Savanyú", ["CITROM", "KÁVÉ"]],
+        ["Kicsi", ["MÉRET", "CENTI"]],
+        ["Rövid", ["TÁVOLSÁG", "VONALZÓ"]],
+        ["Nehéz", ["SÚLY", "MÉRLEG"]],
+        ["Drága", ["ÁR", "PÉNZTÁRCA"]],
+        ["Új", ["ÁLLAPOT", "KOR"]],
+        ["Tiszta", ["MOSÁS", "FOLT"]],
+        ["Tele", ["POHÁR", "TARTALOM"]],
+        ["Nyitva", ["AJTÓ", "TÁBLA"]],
+        ["Igen", ["VÁLASZ", "BÓLINTÁS"]],
+        ["Talán", ["ESÉLY", "DÖNTÉS"]],
+        ["Kérdés", ["MIÉRT", "MONDAT"]],
+        ["Probléma", ["BAJ", "AGYALÁS"]],
+        ["Szabály", ["ELŐÍRÁS", "TÖRVÉNY"]],
+        ["Kezdet", ["START", "CÉL"]],
+        ["Jobb", ["IRÁNY", "KÉZ"]],
+        ["Fent", ["POZÍCIÓ", "MUTAT"]],
+        ["Előtt", ["HELY", "SOR"]],
+        ["Kívül", ["TÉR", "DOBOZ"]],
+        ["Egy", ["SZÁM", "MENNYISÉG"]],
+        ["Sok", ["ADAG", "KUPAC"]],
+        ["Minden", ["TELJES", "ÜRES"]],
+        ["Szín", ["LÁTVÁNY", "FESTÉK"]],
+        ["Piros", ["ALAPSZÍN", "SZEM"]],
+        ["Zöld", ["CITROM", "FŰ"]],
+        ["Kör", ["ALAKZAT", "GEOMETRIA"]],
+        ["Vonal", ["RAJZ", "CERUZA"]]
+    ];
+
+    let players = [], cur = 0;
+    let timerInterval = null; 
+
+    function init() {
+        const n = parseInt(document.getElementById('pCount').value);
+        if(n < 3 || n > 12) return alert("Kérem, 3 és 12 közötti létszámot adjon meg!");
+        const pick = db[Math.floor(Math.random() * db.length)];
+        
+        players = new Array(n).fill('AGENT');
+        
+        let fIdx = Math.floor(Math.random() * n);
+        players[fIdx] = 'PHANTOM';
+        
+        players = players.map(role => {
+            if(role === 'AGENT') return { n: 'ÜGYNÖK', w: pick[0], c: 'clr-agent', m: 'Védd az információt! Ne légy túl nyílt, mert a Fantom figyel.' };
+            return { n: 'FANTOM', meta: pick[1], c: 'clr-phantom', m: 'Csak töredékeket kaptál. Hallgasd az utalásokat, és találd ki a kulcsszót!' };
+        });
+        
+        document.getElementById('scr-start').classList.add('hidden');
+        document.getElementById('scr-game').classList.remove('hidden');
+        resetUI();
+    }
+
+    function resetUI() {
+        document.getElementById('pNum').innerText = "ID: 00" + (cur + 1);
+        document.getElementById('file').classList.add('hidden');
+        document.getElementById('btnShow').classList.remove('hidden');
+        document.getElementById('btnNext').classList.add('hidden');
+        
+        if (timerInterval) clearInterval(timerInterval);
+    }
+
+    function reveal() {
+        const p = players[cur];
+        document.getElementById('rName').innerText = p.n;
+        document.getElementById('rName').className = "role-val " + p.c;
+        document.getElementById('mDesc').innerText = p.m;
+        
+        if(p.n === 'FANTOM') {
+            document.getElementById('normal-word').classList.add('hidden');
+            document.getElementById('phantom-meta').classList.remove('hidden');
+            document.getElementById('meta-tags').innerHTML = p.meta.map(m => `<div class="meta-tag">${m}</div>`).join('');
+        } else {
+            document.getElementById('normal-word').classList.remove('hidden');
+            document.getElementById('phantom-meta').classList.add('hidden');
+            document.getElementById('sWord').innerText = p.w;
+        }
+        
+        document.getElementById('file').classList.remove('hidden');
+        document.getElementById('btnShow').classList.add('hidden');
+        
+        const btnNext = document.getElementById('btnNext');
+        btnNext.classList.remove('hidden');
+        btnNext.classList.add('disabled'); 
+        
+        let timeLeft = 7;
+        btnNext.innerText = `AKTA ZÁRÁSA ÉS TOVÁBB (${timeLeft} mp)`;
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft > 0) {
+                btnNext.innerText = `AKTA ZÁRÁSA ÉS TOVÁBB (${timeLeft} mp)`;
+            } else {
+                clearInterval(timerInterval);
+                btnNext.classList.remove('disabled'); 
+                btnNext.innerText = `AKTA ZÁRÁSA ÉS TOVÁBB`;
+            }
+        }, 1000);
+    }
+
+    function next() {
+        cur++;
+        if(cur >= players.length) {
+            document.getElementById('scr-game').classList.add('hidden');
+            document.getElementById('scr-brief').classList.remove('hidden');
+        } else { resetUI(); }
+    }
+</script>
+</body>
+</html>
