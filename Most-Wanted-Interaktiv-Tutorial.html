@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Most Wanted · Interaktív játéktutorial</title>
+  <style>:root {
+    --bg: #0a0c11;
+    --bg-soft: #10131a;
+    --panel: rgba(20, 24, 33, .9);
+    --panel-strong: #171c27;
+    --panel-light: #202735;
+    --text: #f4f6fb;
+    --muted: #8d98aa;
+    --faint: #596375;
+    --line: rgba(255,255,255,.09);
+    --accent: #9b87f5;
+    --accent-strong: #c2b8ff;
+    --red: #ff6174;
+    --green: #55d69a;
+    --amber: #f7c66d;
+    --radius: clamp(12px, 1vw, 18px);
+    --space: clamp(12px, 1.6vw, 24px);
+    --text-scale: clamp(.9rem, .82rem + .22vw, 1.08rem);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    font-size: clamp(14px, 12px + .34vw, 18px);
+}
+
+body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    background:
+        radial-gradient(circle at 85% -10%, rgba(155,135,245,.15), transparent 38rem),
+        radial-gradient(circle at -10% 100%, rgba(85,214,154,.08), transparent 30rem),
+        var(--bg);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: var(--text-scale);
+    line-height: 1.45;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+select,
+input,
+textarea {
+    border-radius: 10px;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(155,135,245,.45);
+    outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    font-size: clamp(1.55rem, 1.2rem + 1.1vw, 2.35rem);
+    line-height: 1.05;
+    letter-spacing: -.045em;
+    margin-bottom: .45rem;
+}
+
+h2 {
+    font-size: clamp(1.05rem, .92rem + .42vw, 1.45rem);
+    letter-spacing: -.025em;
+    margin-bottom: .35rem;
+}
+
+.muted,
+.small {
+    color: var(--muted);
+}
+
+.small {
+    font-size: .78rem;
+}
+
+.eyebrow {
+    margin-bottom: .35rem;
+    color: var(--muted);
+    font-size: .66rem;
+    font-weight: 800;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+}
+
+.app-shell {
+    width: min(100% - 2 * var(--space), 1160px);
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 24px 0;
+}
+
+.narrow-shell {
+    width: min(100% - 2 * var(--space), 680px);
+}
+
+.auth-card,
+.runner-status-card,
+.timer-panel,
+.proximity-panel,
+.info-card,
+.messages-panel,
+.game-hero {
+    background: linear-gradient(145deg, rgba(25,31,43,.96), rgba(14,18,26,.96));
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 80px rgba(0,0,0,.28);
+}
+
+.auth-card {
+    padding: clamp(24px, 5vw, 48px);
+    border-top: 3px solid var(--accent);
+}
+
+.auth-card h1 {
+    margin-top: .9rem;
+    max-width: 13ch;
+}
+
+.auth-card .muted {
+    margin-bottom: 2rem;
+}
+
+.hunter-auth {
+    margin-top: 8vh;
+}
+
+.role-shell {
+    padding-top: clamp(48px, 16vh, 180px);
+}
+
+.role-actions {
+    display: grid;
+    gap: .7rem;
+    margin-top: 2rem;
+}
+
+.role-card {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto;
+    align-items: center;
+    gap: .8rem;
+    padding: 1rem;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(255,255,255,.035);
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.role-card:hover {
+    transform: translateX(4px);
+    border-color: rgba(155,135,245,.55);
+    background: rgba(155,135,245,.1);
+}
+
+.role-card.primary-role {
+    border-color: rgba(155,135,245,.48);
+    background: linear-gradient(100deg, rgba(155,135,245,.18), rgba(105,121,232,.08));
+}
+
+.role-card strong,
+.role-card small {
+    display: block;
+}
+
+.role-card strong {
+    font-size: .9rem;
+}
+
+.role-card small {
+    margin-top: .18rem;
+    color: var(--muted);
+    font-size: .68rem;
+}
+
+.role-card b {
+    color: var(--accent-strong);
+    font-size: 1.2rem;
+}
+
+.role-index {
+    color: var(--muted);
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    color: var(--accent-strong);
+    font-size: .72rem;
+    font-weight: 900;
+    letter-spacing: .16em;
+}
+
+.brand-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid rgba(194,184,255,.55);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: .6rem;
+    letter-spacing: 0;
+    background: linear-gradient(135deg, var(--accent), #5e75dd);
+}
+
+label {
+    display: block;
+    color: var(--muted);
+    font-size: .74rem;
+    font-weight: 700;
+    margin: 1rem 0 .4rem;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: .72rem .8rem;
+    color: var(--text);
+    background: rgba(6,9,14,.62);
+    border: 1px solid var(--line);
+}
+
+textarea {
+    min-height: 4.4rem;
+    resize: vertical;
+}
+
+input::placeholder {
+    color: #657083;
+}
+
+input[type="color"] {
+    height: 2.65rem;
+    padding: .25rem;
+}
+
+.primary-button,
+.danger-button,
+.ghost-button,
+.small-button {
+    border: 0;
+    color: var(--text);
+    font-size: .72rem;
+    font-weight: 850;
+    letter-spacing: .06em;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.primary-button {
+    width: 100%;
+    padding: .85rem 1rem;
+    margin-top: 1.2rem;
+    background: linear-gradient(135deg, var(--accent), #6979e8);
+    box-shadow: 0 10px 28px rgba(117,103,218,.23);
+}
+
+.primary-button:hover,
+.small-button:hover,
+.danger-button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.ghost-button {
+    width: auto;
+    padding: .58rem .78rem;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--muted);
+}
+
+.danger-button {
+    width: calc(100% - 2 * var(--space));
+    margin: 0 var(--space) var(--space);
+    padding: .75rem;
+    background: rgba(255,97,116,.16);
+    color: #ffadba;
+}
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: var(--space);
+}
+
+.header-tools {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+}
+
+.clock-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 6.7em;
+    padding: .42rem .65rem;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    background: rgba(5,8,13,.72);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .08em;
+    font-size: .72rem;
+    font-weight: 850;
+    box-shadow: inset 0 0 18px rgba(255,255,255,.03);
+}
+
+.page-header.compact {
+    align-items: center;
+    margin: 0;
+}
+
+.page-header.compact h1 {
+    margin: .35rem 0 0;
+    font-size: 1.2rem;
+}
+
+.game-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: var(--space);
+    margin-bottom: var(--space);
+}
+
+.game-hero h2 {
+    margin-bottom: .25rem;
+}
+
+.status-chip,
+.live-pill,
+.runner-state {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: .34rem .55rem;
+    border-radius: 999px;
+    border: 1px solid rgba(85,214,154,.28);
+    background: rgba(85,214,154,.12);
+    color: var(--green);
+    font-size: .62rem;
+    font-weight: 900;
+    letter-spacing: .08em;
+}
+
+.live-pill.warning,
+.runner-state.late {
+    color: #ffb0b9;
+    border-color: rgba(255,97,116,.35);
+    background: rgba(255,97,116,.12);
+}
+
+.runner-status-card,
+.timer-panel,
+.proximity-panel,
+.info-card,
+.messages-panel {
+    padding: var(--space);
+    margin-bottom: var(--space);
+}
+
+.section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.section-heading h2 {
+    margin: 0;
+}
+
+.status-detail {
+    color: var(--muted);
+    margin: .75rem 0 1rem;
+}
+
+.status-progress {
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(255,255,255,.07);
+    overflow: hidden;
+}
+
+.status-progress span {
+    display: block;
+    width: 42%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    animation: progress 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes progress {
+    to {
+        width: 88%;
+        opacity: .5;
+    }
+}
+
+.sub-status {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .5rem;
+    margin-top: .7rem;
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 750;
+}
+
+.sub-status span:last-child {
+    color: var(--accent-strong);
+}
+
+.timer-panel {
+    text-align: center;
+}
+
+.timer-huge {
+    margin: .1rem 0 .8rem;
+    font-size: clamp(2.6rem, 10vw, 5.2rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 850;
+    letter-spacing: -.07em;
+}
+
+.timer-huge.late {
+    color: var(--red);
+    animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    to {
+        opacity: .5;
+    }
+}
+
+.data-grid {
+    display: grid;
+    gap: .65rem;
+}
+
+.data-grid.three {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.data-grid.two {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.data-tile {
+    min-width: 0;
+    padding: .8rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(255,255,255,.035);
+    text-align: left;
+}
+
+.data-tile span {
+    display: block;
+    color: var(--muted);
+    font-size: .6rem;
+    font-weight: 800;
+    letter-spacing: .1em;
+}
+
+.data-tile strong {
+    display: block;
+    margin-top: .25rem;
+    font-size: clamp(.85rem, .75rem + .25vw, 1.15rem);
+    overflow-wrap: anywhere;
+}
+
+.accent-tile {
+    border-color: rgba(155,135,245,.42);
+    background: rgba(155,135,245,.09);
+}
+
+.radar-dot,
+.live-dot,
+.muted-dot {
+    display: inline-block;
+    width: .55rem;
+    height: .55rem;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 .28rem rgba(85,214,154,.12);
+}
+
+.radar-dot {
+    animation: pulse 1.2s infinite alternate;
+}
+
+.live-dot {
+    width: .45rem;
+    height: .45rem;
+    box-shadow: none;
+    margin-right: .35rem;
+}
+
+.muted-dot {
+    width: .45rem;
+    height: .45rem;
+    background: var(--faint);
+    box-shadow: none;
+    margin-right: .35rem;
+}
+
+.runner-speed-line {
+    margin-top: .8rem;
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+.runner-speed-line strong {
+    color: var(--text);
+}
+
+.info-card p:last-child {
+    margin-bottom: 0;
+    color: var(--muted);
+}
+
+.announcement-card {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .9rem;
+    border-radius: 10px;
+    border: 1px solid rgba(155,135,245,.25);
+    background: rgba(155,135,245,.1);
+}
+
+.announcement-card p {
+    margin: 0;
+}
+
+.announcement-card.priority-urgent {
+    border-color: rgba(255,97,116,.55);
+    background: rgba(255,97,116,.14);
+}
+
+.announcement-card.priority-important {
+    border-color: rgba(247,198,109,.45);
+    background: rgba(247,198,109,.1);
+}
+
+.announcement-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #0c0d12;
+    font-weight: 900;
+}
+
+.alert-banner,
+.hunter-toast {
+    position: fixed;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-1rem);
+    transition: opacity .22s ease, transform .22s ease;
+}
+
+.alert-banner {
+    top: 1rem;
+    left: 50%;
+    width: min(calc(100% - 2 * var(--space)), 620px);
+    display: flex;
+    gap: .8rem;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: var(--radius);
+    background: #222938;
+    box-shadow: 0 18px 50px rgba(0,0,0,.5);
+    transform: translate(-50%, -1rem);
+}
+
+.alert-banner.visible,
+.hunter-toast.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+}
+
+.alert-banner.priority-important {
+    border-color: rgba(247,198,109,.55);
+    background: #332d20;
+}
+
+.alert-banner.priority-urgent {
+    border-color: rgba(255,97,116,.75);
+    background: #371f28;
+}
+
+.alert-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.alert-banner strong {
+    font-size: .7rem;
+    letter-spacing: .08em;
+}
+
+.alert-banner p {
+    margin: .2rem 0 0;
+    font-weight: 650;
+}
+
+/* Hunter layout */
+
+.hunter-layout {
+    display: grid;
+    grid-template-columns: minmax(360px, 440px) minmax(0, 1fr);
+    gap: var(--space);
+    min-height: 100dvh;
+    padding: var(--space);
+}
+
+.hunter-sidebar {
+    display: flex;
+    min-height: calc(100dvh - 2 * var(--space));
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgba(13,17,24,.92);
+}
+
+.sidebar-header,
+.settings-panel,
+.message-composer {
+    padding: var(--space);
+    border-bottom: 1px solid var(--line);
+}
+
+.hunter-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .45rem;
+    margin-top: 1rem;
+}
+
+.hunter-stats div {
+    min-width: 0;
+    padding: .65rem .35rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: rgba(255,255,255,.035);
+    text-align: center;
+}
+
+.hunter-stats strong,
+.hunter-stats span {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.hunter-stats strong {
+    font-size: clamp(.8rem, .7rem + .25vw, 1.1rem);
+}
+
+.hunter-stats span {
+    margin-top: .15rem;
+    color: var(--muted);
+    font-size: .53rem;
+    font-weight: 800;
+    letter-spacing: .07em;
+}
+
+.gps-status {
+    margin-top: .8rem;
+    color: var(--green);
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.compact-heading {
+    margin-bottom: .8rem;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 .65rem;
+}
+
+.settings-grid label {
+    margin-top: 0;
+}
+
+.settings-panel input,
+.settings-panel select,
+.settings-panel textarea {
+    font-size: .78rem;
+}
+
+.toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: .4rem;
+    margin-top: 1rem;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: 0;
+    padding: .55rem .6rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: rgba(255,255,255,.03);
+    font-size: .68rem;
+}
+
+.toggle input {
+    width: auto;
+    accent-color: var(--accent);
+}
+
+.settings-panel .primary-button {
+    margin-top: 1rem;
+}
+
+.composer-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: .5rem;
+}
+
+.composer-row .primary-button {
+    margin: 0;
+}
+
+.message-composer input {
+    margin-top: .5rem;
+}
+
+.runner-list {
+    flex: 1;
+    min-height: 180px;
+    max-height: 42vh;
+    overflow: auto;
+    padding: var(--space);
+}
+
+.runner-card {
+    margin-bottom: .7rem;
+    padding: .85rem;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--green);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(29,36,49,.94), rgba(19,24,33,.94));
+}
+
+.runner-card.late {
+    border-left-color: var(--red);
+}
+
+.runner-card.most-wanted {
+    border-color: rgba(255,97,116,.7);
+    box-shadow:
+        0 0 0 1px rgba(255,97,116,.14),
+        0 10px 28px rgba(255,97,116,.1);
+}
+
+.runner-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.runner-card-title strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.mw-badge {
+    display: inline-block;
+    margin-left: .35rem;
+    padding: .2rem .35rem;
+    border-radius: 5px;
+    background: var(--red);
+    color: #fff;
+    font-size: .52rem;
+    vertical-align: middle;
+}
+
+.runner-live-line {
+    margin: .55rem 0;
+    color: var(--muted);
+    font-size: .64rem;
+    font-weight: 700;
+}
+
+.runner-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .45rem;
+}
+
+.runner-card-grid span {
+    min-width: 0;
+    color: var(--muted);
+    font-size: .59rem;
+}
+
+.runner-card-grid b {
+    display: block;
+    margin-top: .15rem;
+    color: var(--text);
+    font-size: .7rem;
+    overflow-wrap: anywhere;
+}
+
+.runner-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .45rem;
+    margin-top: .7rem;
+}
+
+.small-button {
+    width: 100%;
+    padding: .55rem .45rem;
+    background: var(--accent);
+    font-size: .58rem;
+}
+
+.small-button.secondary {
+    background: rgba(255,255,255,.1);
+    color: var(--text);
+}
+
+.small-button.danger {
+    background: rgba(255,97,116,.75);
+}
+
+.penalty-select {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: .5rem;
+    font-size: .68rem;
+}
+
+.empty-state {
+    padding: 2rem 1rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.empty-state strong,
+.empty-state span {
+    display: block;
+}
+
+.empty-state span {
+    margin-top: .35rem;
+    font-size: .78rem;
+}
+
+.event-log {
+    max-height: 150px;
+    overflow: auto;
+    padding: 0 var(--space) var(--space);
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: .62rem;
+}
+
+.event-log div {
+    padding: .35rem 0;
+    border-top: 1px solid var(--line);
+}
+
+.event-log time {
+    color: var(--accent-strong);
+}
+
+.map-container {
+    position: relative;
+    min-height: 520px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-strong);
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    min-height: 520px;
+}
+
+.map-overlay {
+    position: absolute;
+    z-index: 500;
+    top: var(--space);
+    left: var(--space);
+    right: var(--space);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    pointer-events: none;
+    padding: .75rem 1rem;
+    border: 1px solid rgba(0,0,0,.14);
+    border-radius: 10px;
+    background: rgba(11,14,20,.86);
+    backdrop-filter: blur(12px);
+}
+
+.map-overlay strong {
+    display: block;
+}
+
+.map-legend {
+    align-self: center;
+    color: var(--muted);
+    font-size: .62rem;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: .5rem;
+    height: .5rem;
+    margin: 0 .25rem 0 .6rem;
+    border-radius: 50%;
+    background: var(--faint);
+}
+
+.legend-dot.live {
+    background: var(--green);
+}
+
+.runner-pin-wrap {
+    background: transparent;
+    border: 0;
+}
+
+.runner-pin {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #fff;
+    border-radius: 50% 50% 50% 0;
+    background: var(--faint);
+    box-shadow: 0 3px 12px rgba(0,0,0,.4);
+    transform: rotate(-45deg);
+}
+
+.runner-pin.live {
+    background: var(--green);
+}
+
+.runner-pin.wanted {
+    width: 25px;
+    height: 25px;
+    background: var(--red);
+    box-shadow:
+        0 0 0 6px rgba(255,97,116,.2),
+        0 3px 16px rgba(0,0,0,.5);
+}
+
+.hunter-toast-stack {
+    position: fixed;
+    z-index: 10001;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(92vw, 500px);
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    pointer-events: none;
+}
+
+.hunter-toast {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: .7rem;
+    min-height: 3.6rem;
+    padding: .75rem .85rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(17,21,29,.95);
+    box-shadow: 0 14px 40px rgba(0,0,0,.36);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    transform: translateY(-10px) scale(.98);
+    transition: opacity .2s ease, transform .2s ease;
+    pointer-events: auto;
+}
+
+.hunter-toast.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.hunter-toast.removing {
+    opacity: 0;
+    transform: translateY(-8px) scale(.98);
+}
+
+.hunter-toast strong {
+    font-size: .62rem;
+    letter-spacing: .1em;
+}
+
+.hunter-toast span {
+    font-weight: 700;
+    font-size: .86rem;
+}
+
+.hunter-toast button {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: rgba(255,255,255,.05);
+    color: #fff;
+    cursor: pointer;
+}
+
+.hunter-toast.priority-urgent {
+    border-color: rgba(255,97,116,.75);
+    box-shadow: 0 16px 46px rgba(255,55,0,.13);
+}
+
+/* Most Wanted: orange / red / black alert theme */
+
+body.runner-most-wanted {
+    --accent: #ff7a18;
+    --accent-strong: #ff9f43;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(255,80,0,.16), transparent 42%),
+        #080808;
+}
+
+body.runner-most-wanted .runner-status-card,
+body.runner-most-wanted .timer-panel,
+body.runner-most-wanted .proximity-panel,
+body.runner-most-wanted .info-card,
+body.runner-most-wanted .messages-panel,
+body.runner-most-wanted .game-hero {
+    border-color: rgba(255,90,20,.42);
+    box-shadow:
+        0 0 0 1px rgba(255,70,0,.06),
+        0 18px 45px rgba(0,0,0,.35);
+}
+
+body.runner-most-wanted .status-chip,
+body.runner-most-wanted .live-pill {
+    background: linear-gradient(135deg,#ff6a00,#d61f00);
+    color: #fff;
+    border-color: #ff7a18;
+}
+
+body.runner-most-wanted .accent-tile {
+    background: linear-gradient(145deg,rgba(255,90,20,.18),rgba(80,0,0,.14));
+}
+
+body.runner-most-wanted .messages-panel {
+    border-left: 4px solid #ff5a1f;
+    overflow: hidden;
+}
+
+.alert-banner.most-wanted {
+    border-color: #ff6a00;
+    box-shadow:
+        0 0 0 2px rgba(255,106,0,.18),
+        0 18px 55px rgba(255,55,0,.28);
+}
+
+.alert-banner.priority-urgent {
+    animation: mwAlertPulse 1s ease-in-out 3;
+}
+
+@keyframes mwAlertPulse {
+    0%,100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(0) scale(1.025);
+    }
+}
+
+.hunter-toast.priority-important {
+    border-color: rgba(247,198,109,.75);
+    box-shadow:
+        0 0 0 2px rgba(247,198,109,.12),
+        0 12px 35px rgba(0,0,0,.35);
+}
+
+.hunter-toast.priority-urgent {
+    border-color: rgba(255,97,116,.9);
+    box-shadow:
+        0 0 0 2px rgba(255,97,116,.16),
+        0 12px 40px rgba(255,55,0,.16);
+    animation: mwAlertPulse 1s ease-in-out 2;
+}
+
+/* Premium notification stack */
+
+.alert-stack {
+    position: fixed;
+    z-index: 10000;
+    top: clamp(.65rem, 2vw, 1.2rem);
+    left: 50%;
+    width: min(94vw, 780px);
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.alert-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.7rem 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    min-height: 6.1rem;
+    padding: 1.08rem 1.15rem;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(18,21,29,.98), rgba(7,9,13,.98));
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.56),
+        inset 0 1px 0 rgba(255,255,255,.07),
+        0 0 0 1px rgba(255,255,255,.025);
+    backdrop-filter: blur(22px) saturate(1.35);
+    opacity: 0;
+    transform: translateY(-18px) scale(.985);
+    transition:
+        opacity .25s ease,
+        transform .25s ease,
+        max-height .3s ease,
+        margin .3s ease;
+    pointer-events: auto;
+}
+
+.alert-card.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.alert-card.removing {
+    opacity: 0;
+    transform: translateY(-12px) scale(.98);
+    max-height: 0;
+    min-height: 0;
+    padding-block: 0;
+    margin-top: -.75rem;
+}
+
+.alert-card-glow {
+    position: absolute;
+    inset: auto auto -55% -10%;
+    width: 45%;
+    height: 170%;
+    border-radius: 50%;
+    background: rgba(255,145,0,.12);
+    filter: blur(26px);
+    pointer-events: none;
+}
+
+.alert-mark {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 16px;
+    font-weight: 950;
+    letter-spacing: .04em;
+    font-size: 1.08rem;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.alert-copy {
+    position: relative;
+    min-width: 0;
+}
+
+.alert-kicker {
+    font-size: .7rem;
+    font-weight: 900;
+    letter-spacing: .19em;
+    opacity: .9;
+}
+
+.alert-copy p {
+    margin: .28rem 0 0;
+    font-size: clamp(1rem,2.5vw,1.14rem);
+    line-height: 1.35;
+    font-weight: 760;
+    color: #fff;
+    word-break: break-word;
+}
+
+.alert-close {
+    position: relative;
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px;
+    background: rgba(255,255,255,.055);
+    color: #fff;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: .16s ease;
+}
+
+.alert-close:hover {
+    transform: translateY(-1px) scale(1.05);
+    background: rgba(255,255,255,.09);
+}
+
+.alert-close:active {
+    transform: scale(.94);
+}
+
+.alert-card.priority-important {
+    border-color: rgba(247,198,109,.52);
+}
+
+.alert-card.priority-important .alert-mark {
+    background: linear-gradient(145deg, rgba(247,198,109,.23), rgba(150,95,0,.22));
+    color: #ffd889;
+}
+
+.alert-card.priority-urgent {
+    border-color: rgba(255,83,103,.78);
+    box-shadow:
+        0 26px 80px rgba(255,45,80,.15),
+        0 24px 70px rgba(0,0,0,.5);
+}
+
+.alert-card.priority-urgent .alert-mark {
+    background: linear-gradient(145deg, #ff514f, #a91325);
+    color: #fff;
+    box-shadow: 0 0 24px rgba(255,58,75,.3);
+}
+
+.alert-card.most-wanted {
+    border-color: rgba(255,104,10,.9);
+    background:
+        linear-gradient(
+            135deg,
+            rgba(49,18,5,.97),
+            rgba(9,9,10,.98) 62%,
+            rgba(44,5,5,.97)
+        );
+    box-shadow:
+        0 28px 90px rgba(255,71,0,.2),
+        0 24px 70px rgba(0,0,0,.55);
+}
+
+.alert-card.most-wanted .alert-mark {
+    background: conic-gradient(
+        from 210deg,
+        #ffd45a,
+        #ff6a00,
+        #b40000,
+        #ff6a00,
+        #ffd45a
+    );
+    color: #120600;
+    box-shadow: 0 0 28px rgba(255,86,0,.42);
+}
+
+.alert-card.most-wanted .alert-kicker {
+    color: #ffb347;
+}
+
+.alert-card.most-wanted .alert-glow {
+    background: rgba(255,74,0,.22);
+}
+
+/* Stronger Most Wanted runner theme */
+
+body.runner-most-wanted {
+    --accent: #ff6508;
+    --accent-strong: #ffb347;
+    --red: #e11d2e;
+    background:
+        radial-gradient(circle at 50% -8%, rgba(255,107,0,.32), transparent 32%),
+        radial-gradient(circle at 100% 45%, rgba(128,0,0,.2), transparent 34%),
+        linear-gradient(180deg, #0a0908 0%, #050505 55%, #080808 100%);
+}
+
+body.runner-most-wanted::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(
+            135deg,
+            rgba(255,80,0,.025) 0 2px,
+            transparent 2px 12px
+        );
+    opacity: .8;
+}
+
+body.runner-most-wanted .game-hero,
+body.runner-most-wanted .runner-status-card,
+body.runner-most-wanted .timer-panel,
+body.runner-most-wanted .proximity-panel,
+body.runner-most-wanted .info-card,
+body.runner-most-wanted .messages-panel {
+    border-color: rgba(255,89,21,.52);
+    box-shadow:
+        0 0 0 1px rgba(255,78,0,.08),
+        0 24px 65px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,165,0,.04);
+}
+
+body.runner-most-wanted .game-hero {
+    overflow: hidden;
+}
+
+body.runner-most-wanted .game-hero::after {
+    content: "● MOST WANTED  /  ACTIVE HUNT";
+    position: absolute;
+    top: .8rem;
+    right: 1rem;
+    padding: .42rem .72rem;
+    border: 1px solid rgba(255,121,32,.55);
+    border-radius: 999px;
+    color: #ffb25e;
+    font-size: .6rem;
+    font-weight: 950;
+    letter-spacing: .18em;
+    background: rgba(22,8,3,.84);
+    box-shadow:
+        0 0 0 1px rgba(255,80,0,.08),
+        0 0 32px rgba(255,74,0,.16),
+        inset 0 1px 0 rgba(255,196,90,.15);
+}
+
+body.runner-most-wanted .timer-huge {
+    text-shadow:
+        0 0 14px rgba(255,120,0,.24),
+        0 0 45px rgba(255,54,0,.16);
+}
+
+body.runner-most-wanted .messages-panel {
+    border-left: 5px solid #ff5a1f;
+    position: relative;
+    overflow: hidden;
+}
+
+body.runner-most-wanted .runner-speed-line {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(86,19,3,.62),
+            rgba(35,8,3,.22)
+        );
+    box-shadow: inset 0 0 22px rgba(255,75,0,.06);
+}
+
+body.runner-most-wanted .status-progress span {
+    background:
+        linear-gradient(
+            90deg,
+            #ff9d2e,
+            #ff3b1f,
+            #b40018
+        );
+    box-shadow: 0 0 18px rgba(255,72,0,.5);
+}
+
+body.runner-most-wanted .status-chip,
+body.runner-most-wanted .live-pill {
+    background:
+        linear-gradient(
+            135deg,
+            #ff9b2e 0%,
+            #ff4d12 42%,
+            #ac071b 100%
+        );
+    border-color: rgba(255,170,84,.65);
+    box-shadow:
+        0 0 24px rgba(255,82,0,.24),
+        inset 0 1px rgba(255,255,255,.2);
+    animation: wantedBadgePulse 2.2s ease-in-out infinite;
+}
+
+body.runner-most-wanted .accent-tile {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,85,0,.2),
+            rgba(115,0,13,.16)
+        );
+}
+
+@keyframes wantedBadgePulse {
+    0%,100% {
+        filter: saturate(1);
+    }
+
+    50% {
+        filter: saturate(1.25) brightness(1.08);
+    }
+}
+
+.messages-panel .section-heading {
+    transform: scale(1.015);
+    transform-origin: left center;
+}
+
+.messages-panel .announcement-card {
+    min-height: 5.4rem;
+    padding: 1.15rem 1.25rem;
+    font-size: 1.04rem;
+}
+
+/* Most Wanted control + performance pass */
+
+.mw-control {
+    margin: 1rem var(--space);
+    padding: 1rem;
+    border: 1px solid rgba(255,106,0,.28);
+    border-radius: 16px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,90,0,.08),
+            rgba(15,16,20,.72)
+        );
+}
+
+.mw-control-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: .65rem;
+}
+
+.mw-control-head h2 {
+    margin: 0;
+}
+
+.mw-control-state {
+    display: inline-flex;
+    align-items: center;
+    padding: .35rem .6rem;
+    border-radius: 999px;
+    font-size: .6rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+    border: 1px solid var(--line);
+}
+
+.mw-control-state.ready {
+    color: #62e6ab;
+    background: rgba(85,214,154,.1);
+}
+
+.mw-control-state.active {
+    color: #ffd17d;
+    background: rgba(255,106,0,.14);
+    border-color: rgba(255,106,0,.48);
+}
+
+.mw-control-state.cooldown {
+    color: #ffb1b9;
+    background: rgba(255,97,116,.1);
+    border-color: rgba(255,97,116,.34);
+}
+
+.mw-control-help {
+    margin-top: .55rem;
+    color: var(--muted);
+    font-size: .72rem;
+}
+
+.runner-actions .small-button:disabled {
+    opacity: .42;
+    cursor: not-allowed;
+    transform: none !important;
+    filter: none !important;
+}
+
+body.runner-page {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+}
+
+body.runner-most-wanted::before,
+body.runner-most-wanted::after {
+    pointer-events: none;
+}
+
+body.runner-most-wanted .game-hero::before {
+    animation: none;
+    opacity: .55;
+}
+
+body.runner-most-wanted .messages-panel::before {
+    animation: none;
+    opacity: .75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.runner-most-wanted *,
+    .alert-card,
+    .hunter-toast {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+    .hunter-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .hunter-sidebar {
+        min-height: auto;
+    }
+
+    .runner-list {
+        max-height: none;
+    }
+
+    .map-container,
+    #map {
+        min-height: 55vh;
+    }
+}
+
+@media (max-width: 560px) {
+    .data-grid.three,
+    .data-grid.two,
+    .settings-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .data-grid.three .data-tile:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .game-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-header h1 {
+        font-size: 1.45rem;
+    }
+
+    .hunter-layout {
+        min-height: 100dvh;
+        padding: .6rem;
+    }
+
+    .hunter-sidebar {
+        min-height: calc(100dvh - 1.2rem);
+    }
+
+    .hunter-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .runner-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .map-overlay {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .alert-stack {
+        width: 96vw;
+        gap: .55rem;
+    }
+
+    .alert-card {
+        min-height: 5.45rem;
+        border-radius: 18px;
+        grid-template-columns: 3rem 1fr auto;
+        gap: .72rem;
+        padding: .92rem .85rem;
+    }
+
+    .alert-mark {
+        width: 2.9rem;
+        height: 2.9rem;
+    }
+
+    .alert-copy p {
+        font-size: .97rem;
+    }
+
+    body.runner-most-wanted .app-shell {
+        width: 100%;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 12px 10px;
+    }
+
+    body.runner-most-wanted {
+        min-height: 100dvh;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    body.runner-most-wanted .game-hero,
+    body.runner-most-wanted .runner-status-card,
+    body.runner-most-wanted .timer-panel,
+    body.runner-most-wanted .proximity-panel,
+    body.runner-most-wanted .info-card,
+    body.runner-most-wanted .messages-panel {
+        box-shadow: 0 10px 28px rgba(0,0,0,.34);
+    }
+
+    body.runner-most-wanted::after {
+        opacity: .12;
+    }
+}
+
+@media (max-width: 390px) {
+    .data-grid.three,
+    .data-grid.two,
+    .settings-grid,
+    .toggle-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-grid.three .data-tile:last-child {
+        grid-column: auto;
+    }
+
+    .runner-actions {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .header-tools {
+        gap: .4rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .clock-chip {
+        font-size: .67rem;
+        min-width: 6.35em;
+        padding: .38rem .55rem;
+    }
+}</style>
+  <style>
+    /* Self-contained tutorial layer */
+    .demo-nav{position:relative;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:.7rem;flex-wrap:wrap;padding:.65rem clamp(12px,1.6vw,24px);border-bottom:1px solid rgba(255,255,255,.07);background:rgba(8,10,15,.88);backdrop-filter:blur(12px)}
+    .demo-nav-brand{display:flex;align-items:center;gap:.55rem;color:#c2b8ff;font-size:.68rem;font-weight:900;letter-spacing:.12em}
+    .demo-nav-brand .brand-mark{width:1.65rem;height:1.65rem}
+    .demo-nav-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+    .demo-nav button{padding:.5rem .7rem;font-size:.66rem}
+    .demo-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .58rem;border-radius:99px;border:1px solid rgba(85,214,154,.24);background:rgba(85,214,154,.07);color:#76e5b3;font-size:.62rem;font-weight:850;letter-spacing:.06em}
+    .demo-badge:before{content:"";width:.42rem;height:.42rem;background:#55d69a;border-radius:50%;box-shadow:0 0 10px #55d69a}
+    .demo-note{margin-top:1.1rem;padding:.85rem 1rem;border:1px solid rgba(155,135,245,.22);border-radius:12px;background:rgba(155,135,245,.06);color:var(--muted);font-size:.78rem}
+    .demo-note strong{color:var(--text)}
+    .role-card{width:100%;text-align:left;cursor:pointer;font:inherit}
+    .role-card:focus-visible{outline:3px solid rgba(155,135,245,.55);outline-offset:3px}
+    .demo-subtitle{font-size:.76rem;color:var(--muted);margin-top:.5rem}
+    .tour-panel{position:fixed;z-index:10020;right:1rem;bottom:1rem;width:min(390px,calc(100vw - 2rem));max-height:min(75vh,620px);overflow:auto;padding:1rem 1rem .85rem;border:1px solid rgba(194,184,255,.35);border-radius:16px;background:rgba(13,17,25,.97);box-shadow:0 24px 90px rgba(0,0,0,.6),0 0 0 1px rgba(155,135,245,.08);backdrop-filter:blur(18px)}
+    .tour-panel[hidden]{display:none!important}
+    .tour-top{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin-bottom:.75rem}
+    .tour-brand{font-size:.62rem;color:#c2b8ff;font-weight:900;letter-spacing:.14em}
+    .tour-step-count{font-size:.63rem;color:var(--muted);font-variant-numeric:tabular-nums}
+    .tour-progress{height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-bottom:.9rem}
+    .tour-progress span{display:block;height:100%;background:linear-gradient(90deg,#9b87f5,#55d69a);width:0;transition:width .25s ease}
+    .tour-panel h2{margin:.2rem 0 .5rem;font-size:1.18rem}
+    .tour-panel p{margin:0 0 .7rem;color:#d0d5df;font-size:.78rem;line-height:1.6}
+    .tour-panel .tour-tip{color:var(--muted);font-size:.7rem;padding:.65rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .tour-controls{display:flex;align-items:center;gap:.45rem;margin-top:.85rem}
+    .tour-controls button{padding:.58rem .75rem;font-size:.68rem}
+    .tour-controls .primary-button{flex:1;margin:0}
+    .tour-close{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);padding:.45rem .6rem!important}
+    .tour-open{position:fixed;z-index:10015;right:1rem;bottom:1rem;display:none;border-radius:99px;padding:.75rem 1rem;box-shadow:0 12px 36px rgba(0,0,0,.4);font-size:.72rem}
+    .tour-open.visible{display:block}
+    .spotlight{position:relative!important;z-index:10010!important;box-shadow:0 0 0 3px rgba(194,184,255,.98),0 0 0 8px rgba(155,135,245,.28),0 0 0 9999px rgba(0,0,0,.34)!important;scroll-margin:90px;transition:box-shadow .2s ease}
+    .hunter-sidebar .spotlight{z-index:10010!important}
+    .section-tour-label{display:none}
+    .demo-actions-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;margin-top:.8rem}
+    .demo-actions-grid button{min-height:43px;padding:.65rem .7rem;font-size:.68rem;text-align:left;line-height:1.35}
+    .demo-actions-grid .primary-button{margin:0}
+    .demo-actions-grid .secondary{background:rgba(255,255,255,.09);color:var(--text)}
+    .demo-actions-grid .warn{background:rgba(247,198,109,.12);color:#f7d58e;border:1px solid rgba(247,198,109,.22)}
+    .demo-actions-grid .danger{background:rgba(255,97,116,.13);color:#ff91a0;border:1px solid rgba(255,97,116,.23)}
+    .demo-status-line{display:flex;justify-content:space-between;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.8rem;color:var(--muted);font-size:.68rem}
+    .demo-status-line strong{color:var(--text)}
+    .demo-tag{display:inline-block;padding:.2rem .42rem;border:1px solid rgba(255,255,255,.1);border-radius:6px;background:rgba(255,255,255,.04);font-size:.58rem;letter-spacing:.07em;font-weight:800}
+    .demo-footer{padding:1.4rem var(--space) 2rem;text-align:center;color:#758093;font-size:.65rem}
+    .demo-footer strong{color:#a5afbf}
+    .demo-toast-stack{position:fixed;z-index:10040;top:4.8rem;left:50%;transform:translateX(-50%);width:min(92vw,480px);display:flex;flex-direction:column;gap:.45rem;pointer-events:none}
+    .demo-toast{padding:.8rem .95rem;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;background:rgba(16,21,31,.97);box-shadow:0 15px 35px rgba(0,0,0,.35);font-size:.76rem;animation:toast-in .2s ease both;pointer-events:auto}
+    .demo-toast.urgent{border-left-color:#ff6174}.demo-toast.important{border-left-color:#f7c66d}
+    @keyframes toast-in{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+    .hunter-sidebar .event-log{min-height:55px}
+    .map-container{background:#121823}
+    #map{position:relative;overflow:hidden;min-height:520px;background:radial-gradient(ellipse at 56% 48%,rgba(63,81,104,.24),transparent 55%),linear-gradient(135deg,#161e29,#0d121b)}
+    #demo-map-svg{position:absolute;inset:0;width:100%;height:100%;min-height:520px}
+    .map-disclaimer{position:absolute;z-index:501;bottom:var(--space);left:var(--space);padding:.42rem .6rem;border:1px solid rgba(255,255,255,.1);border-radius:7px;background:rgba(8,11,16,.8);color:#aab4c4;font-size:.58rem;letter-spacing:.04em}
+    .map-key{font-size:.62rem;fill:#8290a4;letter-spacing:2px}
+    .map-road{fill:none;stroke:#2c3645;stroke-width:20;stroke-linecap:round;stroke-linejoin:round}
+    .map-road-center{fill:none;stroke:#4b586b;stroke-width:2;stroke-dasharray:10 12;opacity:.55}
+    .map-minor{fill:none;stroke:#283241;stroke-width:8;stroke-linecap:round}
+    .map-pin-label{font:700 15px Inter,system-ui,sans-serif;fill:#e8edf5;paint-order:stroke;stroke:#111722;stroke-width:4px;stroke-linejoin:round}
+    .map-pin-sub{font:600 10px Inter,system-ui,sans-serif;fill:#8794a8;paint-order:stroke;stroke:#111722;stroke-width:3px}
+    .map-dot{stroke:#fff;stroke-width:3}.map-dot.live{fill:#55d69a}.map-dot.wanted{fill:#ff6174}.map-dot.normal{fill:#929db0}
+    .map-pulse{fill:none;stroke:#ff6174;stroke-width:2;opacity:.65}
+    .runner-card .demo-runner-actions{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.65rem}
+    .runner-card .demo-runner-actions button{font-size:.56rem;min-height:34px}
+    .runner-card .demo-runner-actions select{grid-column:1/-1;font-size:.65rem}
+    .hunter-sidebar .danger-button{margin:0 var(--space) var(--space)}
+    .settings-panel textarea{min-height:60px;resize:vertical}
+    .settings-panel input[type=color]{height:42px;padding:.25rem}
+    .demo-notice{margin:.6rem 0 0;color:var(--muted);font-size:.65rem;line-height:1.45}
+    .login-error{display:none;margin-top:.65rem;color:#ff8796;font-size:.72rem}
+    .login-error.visible{display:block}
+    .runner-demo-top{display:flex;justify-content:space-between;align-items:center;gap:.7rem;margin-bottom:.9rem}
+    .data-tile strong{font-variant-numeric:tabular-nums}
+    .runner-speed-line{line-height:1.6}
+    .announcement-card{display:flex;align-items:flex-start;gap:.7rem;padding:.9rem;border:1px solid var(--line);border-radius:12px}
+    .announcement-card p{margin:0;font-size:.82rem;line-height:1.55;overflow-wrap:anywhere}
+    .runner-status-card .sub-status{display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+    .runner-status-card .sub-status span{font-size:.6rem}
+    button:disabled{opacity:.4;cursor:not-allowed}
+    @media(max-width:900px){.tour-panel{max-height:56vh;width:min(375px,calc(100vw - 1.2rem));right:.6rem;bottom:.6rem}.hunter-layout{grid-template-columns:minmax(0,1fr)}.map-container{min-height:55vh}}
+    @media(max-width:560px){.demo-nav{align-items:flex-start}.demo-nav-actions{width:100%}.demo-nav-actions button{flex:1}.demo-actions-grid{grid-template-columns:1fr}.tour-panel{max-height:53vh;font-size:.95rem}.tour-panel h2{font-size:1.05rem}.map-overlay{top:.6rem;left:.6rem;right:.6rem}.map-disclaimer{bottom:.6rem;left:.6rem}}
+  </style>
+</head>
+<body>
+  <nav class="demo-nav" aria-label="Tutorial navigáció">
+    <div class="demo-nav-brand"><span class="brand-mark">MW</span><span>MOST WANTED <span style="color:#79849a;font-weight:700">/ INTERAKTÍV ÚTMUTATÓ</span></span></div>
+    <div class="demo-nav-actions">
+      <span class="demo-badge">HELYI DEMÓ · OFFLINE</span>
+      <button class="ghost-button" type="button" onclick="showWelcome()">Szerepválasztó</button>
+      <button class="ghost-button" type="button" onclick="reopenGuide()">Útmutató</button>
+    </div>
+  </nav>
+  <div id="demo-toast-stack" class="demo-toast-stack" aria-live="polite"></div>
+
+  <!-- Role chooser: visual structure follows the supplied index.html -->
+  <main class="app-shell narrow-shell role-shell" id="welcome-view">
+    <section class="auth-card" data-tour="welcome-card">
+      <div class="brand-lockup"><span class="brand-mark">MW</span><span>MOST WANTED</span></div>
+      <p class="eyebrow">ÉLŐ ÜLDÖZŐS JÁTÉK · BEMUTATÓ</p>
+      <h1>Ismerd meg a hajsza rendszerét.</h1>
+      <p class="muted">Próbáld ki a menekülői felületet és a vadász Control Roomot. A kezelőfelület az eredeti projekt stílusát követi, a működés pedig teljesen helyben, előre beállított demóadatokkal fut.</p>
+      <div class="role-actions">
+        <button class="role-card primary-role" onclick="startRunnerTour()"><span class="role-index">01</span><span><strong>Menekülő bemutató</strong><small>Belépés, időzítő, GPS-jelzés, vadászadatok, üzenetek</small></span><b>→</b></button>
+        <button class="role-card" onclick="startHunterTour()"><span class="role-index">02</span><span><strong>Vadász Control Room</strong><small>Játékbeállítások, térkép, riasztások, büntetés, Most Wanted</small></span><b>→</b></button>
+      </div>
+      <div class="demo-note"><strong>Fontos:</strong> ez oktatási szimuláció, nem az éles játék. Nincs szükség szerverre, adatbázisra, hálózatra vagy valódi helymeghatározási engedélyre. A térképen és a statisztikákban csak kitalált demóadatok szerepelnek.</div>
+    </section>
+  </main>
+
+  <!-- Runner login -->
+  <main class="app-shell narrow-shell" id="runner-login-view" style="display:none">
+    <section class="auth-card" id="runner-login-box">
+      <div class="brand-lockup"><span class="brand-mark">MW</span><span>MOST WANTED</span></div>
+      <p class="eyebrow">MENEKÜLŐI BELÉPÉS</p>
+      <h1>Lépj be a hajsza élő rendszerébe.</h1>
+      <p class="muted">A GPS-ed a beállított időpontban küld hivatalos helyzetet. Az éles játékban ehhez engedélyezett helymeghatározás kell; ebben a demóban a GPS mesterségesen szimulált.</p>
+      <label for="game-code">Játékkód</label><input type="text" id="game-code" value="MW-2026" placeholder="MW-2026" autocomplete="off">
+      <label for="runner-name">Azonosítód</label><input type="text" id="runner-name" value="Alex" placeholder="A játékban használt neved" autocomplete="nickname" maxlength="32">
+      <button class="primary-button" onclick="joinGame()">CSATLAKOZÁS</button>
+      <p id="runner-login-error" class="login-error">Adj meg egy játékkódot és egy nevet a belépéshez.</p>
+      <p class="demo-notice">Próbáld ki: módosítsd a nevet, majd csatlakozz. Semmilyen adat nem kerül elküldésre.</p>
+    </section>
+  </main>
+
+  <!-- Runner dashboard: IDs and core component classes mirror runner.html -->
+  <main class="app-shell narrow-shell" id="runner-dashboard-view" style="display:none">
+    <header class="page-header">
+      <div><div class="brand-lockup"><span class="brand-mark">MW</span><span>MOST WANTED</span></div><p class="eyebrow">AKTÍV MENEKÜLŐ · DEMÓ</p><h1 id="r-name">ALEX</h1></div>
+      <div class="header-tools"><span class="clock-chip" id="runner-clock">--:--:--</span><button class="ghost-button" onclick="leaveGame()">KILÉPÉS</button></div>
+    </header>
+    <section class="game-hero" data-tour="runner-hero">
+      <div><p class="eyebrow">JÁTÉK</p><h2 id="r-game-title">Most Wanted - A hajsza</h2><p id="r-game-description" class="muted">A vadászok követik a menekülőket.</p></div>
+      <span class="status-chip" id="r-game-status">VÁRAKOZÁS</span>
+    </section>
+    <section class="runner-status-card" id="r-status-card" data-tour="runner-status">
+      <div class="section-heading"><div><p class="eyebrow">KÖVETÉSI ÁLLAPOT</p><h2 id="r-status">INDULÁSRA KÉSZ</h2></div><span class="live-pill" id="r-live-pill">ONLINE</span></div>
+      <p class="status-detail" id="r-status-detail">A hivatalos helyzetjelzés az időzítő lejártakor indul.</p>
+      <div class="status-progress"><span></span></div>
+      <div class="sub-status"><span id="r-gps">GPS DEMÓ: KÉSZ</span><span id="r-penalty">IDŐZÍTETT KÖVETÉS</span></div>
+    </section>
+    <section class="timer-panel" id="r-timer-panel" data-tour="runner-timer">
+      <p class="eyebrow">KÖVETKEZŐ HIVATALOS JELZÉS</p><div class="timer-huge" id="countdown">00:20:00</div>
+      <div class="data-grid three"><div class="data-tile"><span>UTOLSÓ JEL</span><strong id="r-last">--:--:--</strong></div><div class="data-tile"><span>KÖVETKEZIK</span><strong id="r-next">--:--:--</strong></div><div class="data-tile"><span>INTERVALLUM</span><strong id="r-interval">20 perc</strong></div></div>
+      <p class="demo-notice">A számláló a demóban valódi idővel csökken, de a „+1 perc” gombbal gyorsíthatod a próbát.</p>
+    </section>
+    <section class="proximity-panel" id="r-proximity-panel" data-tour="runner-proximity">
+      <div class="section-heading"><div><p class="eyebrow">VADÁSZ AKTIVITÁS</p><h2>A közeledő veszély</h2></div><span class="radar-dot"></span></div>
+      <div class="data-grid two"><div class="data-tile accent-tile"><span>LÉGVONALBELI TÁVOLSÁG</span><strong id="r-hunter-distance">4,82 km</strong></div><div class="data-tile"><span>VADÁSZ SEBESSÉGE</span><strong id="r-hunter-speed">34,2 km/h</strong></div></div>
+      <p class="muted small" id="r-hunter-updated">A vadász szimulált GPS-e aktív.</p><div class="runner-speed-line">A saját GPS-ed szerint: <strong id="r-own-speed">12,4 km/h</strong></div>
+    </section>
+    <section class="info-card" id="r-instructions-card"><p class="eyebrow">JÁTÉKSZABÁLYOK</p><p id="r-instructions">Tartsd nyitva az oldalt, és figyeld a hivatalos jelzés időzítőjét.</p></section>
+    <section class="messages-panel" id="r-messages-panel" data-tour="runner-messages">
+      <div class="section-heading"><div><p class="eyebrow">JÁTÉKÜZENETEK</p><h2>Fontos információk</h2></div></div>
+      <div id="r-announcement-card" class="announcement-card priority-important"><span class="announcement-icon">!</span><p id="r-announcement">A játékhoz tartozó üzenetek itt jelennek meg.</p></div>
+    </section>
+    <section class="info-card" id="runner-demo-lab" data-tour="runner-lab">
+      <div class="section-heading"><div><p class="eyebrow">HELYI PRÓBAPULT</p><h2>Próbáld ki a funkciókat</h2></div><span class="demo-tag">CSAK DEMÓ</span></div>
+      <p class="muted small">Ezek a gombok valóban megváltoztatják a fenti felületet, de nem használnak éles GPS-t vagy szervert.</p>
+      <div class="demo-actions-grid">
+        <button class="primary-button" onclick="sendOfficialSignal()">⌖ Hivatalos helyzetjelzés</button>
+        <button class="secondary" onclick="simulateRunnerGps()">↗ GPS / sebesség frissítése</button>
+        <button class="secondary" onclick="advanceDemoMinute()">＋ Demóidő +1 perc</button>
+        <button class="warn" onclick="demoRunnerNotice()">! Próbaértesítés megjelenítése</button>
+        <button class="secondary" onclick="moveHunterCloser()">◎ Vadász közelebb / távolabb</button>
+        <button class="danger" onclick="leaveGame()">Kilépés a menekülőből</button>
+      </div>
+      <div class="demo-status-line"><span>Adatforrás</span><strong>Helyi szimuláció</strong><span id="runner-demo-status" class="demo-tag">CSATLAKOZVA</span></div>
+    </section>
+  </main>
+
+  <!-- Hunter login -->
+  <main id="hunter-login-view" class="app-shell narrow-shell" style="display:none">
+    <section class="auth-card hunter-auth" id="hunter-login-box">
+      <div class="brand-lockup"><span class="brand-mark">MW</span><span>MOST WANTED</span></div><p class="eyebrow">VADÁSZ IRÁNYÍTÓPULT</p>
+      <h1>Vezesd a hajszát.</h1><p class="muted">Élő térkép, GPS-státuszok, riasztások és játékvezérlés egy helyen. Az éles változatban a Control Room PIN-kóddal védett; itt biztonságosan, helyben próbálhatod ki.</p>
+      <label for="hunter-pin">Vadász PIN</label><input type="password" id="hunter-pin" placeholder="A demóban bármilyen PIN elfogadott" autocomplete="off">
+      <button class="primary-button" onclick="loginHunter()">BELÉPÉS A CONTROL ROOMBA</button>
+      <p class="demo-notice">A demóban a PIN csak a belépési folyamat bemutatására szolgál, nem ellenőriz szervert.</p>
+    </section>
+  </main>
+
+  <!-- Hunter control room, structure/classes from supplied hunter.html -->
+  <main id="hunter-layout" class="hunter-layout" style="display:none">
+    <aside class="hunter-sidebar">
+      <header class="sidebar-header">
+        <div class="page-header compact"><div><div class="brand-lockup"><span class="brand-mark">MW</span><span>CONTROL ROOM</span></div><h1>Vadász irányítópult</h1></div><div class="header-tools"><span class="live-pill">DEMÓ</span><span class="clock-chip" id="hunter-clock">--:--:--</span></div></div>
+        <div class="hunter-stats" id="hunter-stats" data-tour="hunter-stats"><div><strong id="stat-runners">3</strong><span>MENEKÜLŐ</span></div><div><strong id="stat-active">3</strong><span>AKTÍV</span></div><div><strong id="stat-wanted">—</strong><span>CÉLPONT</span></div><div><strong id="stat-hunter-speed">34,2</strong><span>SAJÁT KM/H</span></div></div>
+        <div class="gps-status" id="hunter-gps-status">VADÁSZ GPS: DEMÓ AKTÍV · ±8 m</div>
+      </header>
+      <section class="settings-panel" id="hunter-settings-panel" data-tour="hunter-settings">
+        <div class="section-heading compact-heading"><div><p class="eyebrow">JÁTÉKVEZÉRLÉS</p><h2>Beállítások</h2></div></div>
+        <div class="settings-grid">
+          <label>Hivatalos jelzés (perc)<input type="number" id="set-interval" min="1" max="1440" value="20"></label>
+          <label>Élő frissítés (mp)<input type="number" id="set-live-interval" min="1" max="10" value="1"></label>
+          <label>Játék állapota<select id="set-status"><option value="waiting">Várakozás</option><option value="live">Élő</option><option value="paused">Szünetel</option><option value="finished">Lezárva</option></select></label>
+          <label>Közlemény súlya<select id="set-priority"><option value="normal">Normál</option><option value="important" selected>Fontos</option><option value="urgent">Azonnali</option></select></label>
+          <label>Akcentusszín<input type="color" id="set-accent" value="#9b87f5"></label>
+        </div>
+        <label>Játék címe<input type="text" id="set-title" maxlength="120" value="Most Wanted - A hajsza"></label>
+        <label>Rövid leírás<textarea id="set-description" maxlength="500">A vadászok követik a menekülőket.</textarea></label>
+        <label>Játékosoknak szóló szabályok<textarea id="set-instructions" maxlength="1000">Tartsd nyitva az oldalt, és figyeld a hivatalos jelzés időzítőjét.</textarea></label>
+        <label>Közlemény<textarea id="set-announcement" maxlength="500">A hajsza hamarosan elindul. Figyeljétek az értesítéseket!</textarea></label>
+        <div class="toggle-grid">
+          <label class="toggle"><input type="checkbox" id="set-distance" checked><span>Távolságok</span></label>
+          <label class="toggle"><input type="checkbox" id="set-speed" checked><span>Sebességek</span></label>
+          <label class="toggle"><input type="checkbox" id="set-alerts" checked><span>Feltűnő riasztások</span></label>
+          <label class="toggle"><input type="checkbox" id="set-accuracy" checked><span>Pontos GPS</span></label>
+          <label class="toggle"><input type="checkbox" id="set-penalty-enabled" checked><span>Büntetés mód</span></label>
+        </div>
+        <button class="primary-button" onclick="updateSettings()">BEÁLLÍTÁSOK MENTÉSE</button>
+        <p class="demo-notice">A mentés az ezen az oldalon futó demóállapotot módosítja, adatbázisba nem ír.</p>
+      </section>
+      <section class="message-composer" id="hunter-message-composer" data-tour="hunter-message">
+        <p class="eyebrow">RIASZTÁS KÜLDÉSE</p><div class="composer-row"><select id="message-priority"><option value="normal">Normál</option><option value="important" selected>Fontos</option><option value="urgent">Azonnali</option></select><button class="primary-button" onclick="sendGlobalMsg()">KÜLDÉS</button></div>
+        <input type="text" id="global-msg" placeholder="Üzenet minden menekülőnek..." value="Figyelem! A hajsza hamarosan elindul.">
+        <p class="demo-notice">A Küldés a menekülői oldalon is frissíti a közleményt, ha az meg van nyitva a demóban.</p>
+      </section>
+      <section class="mw-control" id="mw-control-box" data-tour="hunter-wanted">
+        <div class="mw-control-head"><div><p class="eyebrow">CÉLPONT PROTOKOLL</p><h2>Most Wanted mód</h2></div><span id="most-wanted-control-state" class="mw-control-state ready">KÉSZ</span></div>
+        <select id="set-mw-mode" aria-label="Most Wanted időtartam"><option value="1m">1 perc aktív · 90 mp újrahasználati várakozás</option><option value="2m">2 perc aktív · 150 mp újrahasználati várakozás</option></select>
+        <div id="most-wanted-control-help" class="mw-control-help">Válaszd ki a taktikát, majd jelölj ki egyetlen célpontot.</div>
+        <p class="demo-notice">Aktív célpontból egyszerre csak egy lehet. A Most Wanted önmagában nem mozgatja a menekülő térképjelölőjét: élő sebesség-/távolságadatot mutat; a folyamatos térképi láthatóságot a büntetés adja.</p>
+      </section>
+      <section class="runner-list" id="runner-list" data-tour="hunter-runners"></section>
+      <section class="event-log" id="event-log" data-tour="hunter-events"></section>
+      <button class="danger-button" onclick="resetGame()">TELJES JÁTÉK RESET</button>
+    </aside>
+    <section class="map-container" id="map-container" data-tour="hunter-map">
+      <div class="map-overlay"><div><span class="eyebrow">ÉLŐ TÉRKÉP</span><strong>Menekülők helyzete</strong></div><span class="map-legend"><i class="legend-dot live"></i> Élő GPS <i class="legend-dot"></i> Hivatalos jel</span></div>
+      <div id="map" aria-label="Szimulált demótérkép">
+        <svg id="demo-map-svg" viewBox="0 0 1000 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Kitalált, stilizált várostérkép">
+          <defs><pattern id="mapgrid" width="54" height="54" patternUnits="userSpaceOnUse"><path d="M54 0H0V54" fill="none" stroke="#273140" stroke-width="1" opacity=".55"/></pattern><linearGradient id="park" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1a362f"/><stop offset="1" stop-color="#122720"/></linearGradient></defs>
+          <rect width="1000" height="900" fill="#111923"/><rect width="1000" height="900" fill="url(#mapgrid)"/>
+          <path d="M-50 205 C180 250 245 110 430 175 S745 315 1050 175" fill="none" stroke="#1a2731" stroke-width="94"/><path d="M-50 205 C180 250 245 110 430 175 S745 315 1050 175" fill="none" stroke="#364251" stroke-width="4" stroke-dasharray="20 18" opacity=".6"/>
+          <path d="M40 980 C130 745 160 630 330 510 S585 375 615 200 S760 40 850 -30" class="map-road"/><path d="M40 980 C130 745 160 630 330 510 S585 375 615 200 S760 40 850 -30" class="map-road-center"/>
+          <path d="M-30 560 C190 500 330 640 470 560 S770 480 1040 610" class="map-road"/><path d="M-30 560 C190 500 330 640 470 560 S770 480 1040 610" class="map-road-center"/>
+          <path d="M210 -40 C240 170 350 280 335 440 S250 690 330 940" class="map-minor"/><path d="M740 -30 C660 180 800 300 760 460 S680 700 790 930" class="map-minor"/><path d="M-30 360 C200 390 390 310 550 370 S800 330 1050 390" class="map-minor"/>
+          <path d="M635 500 C690 420 810 430 880 505 L920 635 810 710 680 650Z" fill="url(#park)" stroke="#29463c" stroke-width="2"/><path d="M100 90 L250 45 310 130 280 225 140 230Z" fill="#19232d" stroke="#293443" stroke-width="2"/><path d="M430 685 L575 665 625 755 580 835 440 815Z" fill="#17232a" stroke="#2a3b43" stroke-width="2"/>
+          <g opacity=".85"><text x="80" y="320" class="map-key">NORTH DISTRICT</text><text x="650" y="770" class="map-key">RIVERSIDE PARK</text><text x="385" y="95" class="map-key">CENTRAL AVENUE</text><text x="90" y="705" class="map-key">OLD TOWN</text><text x="650" y="345" class="map-key">EAST QUARTER</text></g>
+          <g id="map-marker-layer"></g>
+        </svg>
+      </div>
+      <div class="map-disclaimer">DEMO TÉRKÉP · NEM VALÓDI HELYZET</div>
+    </section>
+  </main>
+
+  <section class="tour-panel" id="tour-panel" aria-live="polite" hidden>
+    <div class="tour-top"><span class="tour-brand">MW FIELD GUIDE / INTERAKTÍV</span><span class="tour-step-count" id="tour-step-count">1 / 6</span><button class="tour-close" onclick="closeGuide()" aria-label="Útmutató bezárása">×</button></div>
+    <div class="tour-progress"><span id="tour-progress-fill"></span></div>
+    <p class="eyebrow" id="tour-eyebrow">BEVEZETÉS</p><h2 id="tour-title">Üdv a hajsza rendszerében</h2><p id="tour-text"></p><div class="tour-tip" id="tour-tip"></div>
+    <div class="tour-controls"><button class="ghost-button" id="tour-prev" onclick="previousTourStep()">← Vissza</button><button class="primary-button" id="tour-next" onclick="nextTourStep()">Következő →</button></div>
+  </section>
+  <button class="primary-button tour-open" id="tour-open" onclick="reopenGuide()">? Útmutató megnyitása</button>
+  <footer class="demo-footer"><strong>MOST WANTED · OFFLINE INTERAKTÍV TUTORIAL</strong><br>Minden adat szimulált. Ez az egyetlen HTML-fájl nem küld hálózati kérést, nem kér GPS-hozzáférést és nem kapcsolódik az éles játékhoz.</footer>
+
+  <script>
+  'use strict';
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+  const fmtClock = (date = new Date()) => date.toLocaleTimeString('hu-HU', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+  const fmtCountdown = (seconds) => { const total=Math.max(0,Math.ceil(seconds)); const h=Math.floor(total/3600); const m=Math.floor((total%3600)/60); const s=total%60; return [h,m,s].map(n=>String(n).padStart(2,'0')).join(':'); };
+  const fmtShortTime = (date = new Date()) => date.toLocaleTimeString('hu-HU',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const esc = (value) => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const DEFAULTS = {
+    locationInterval:20, liveInterval:1, gameStatus:'waiting', announcementPriority:'important', accent:'#9b87f5', title:'Most Wanted - A hajsza', description:'A vadászok követik a menekülőket.', instructions:'Tartsd nyitva az oldalt, és figyeld a hivatalos jelzés időzítőjét.', announcement:'A hajsza hamarosan elindul. Figyeljetek az értesítésekre!', distanceEnabled:true, speedEnabled:true, alertsEnabled:true, accuracyEnabled:true, penaltyEnabled:true, mwMode:'1m'
+  };
+  let game;
+  let currentView='welcome', currentRole=null, tourRole=null, tourStep=0, tourIsActive=false, tourWasClosed=false;
+  let countdownSeconds=20*60, hunterDistance=4.82, hunterSpeed=34.2, runnerSpeed=12.4, hunterClockTimer=null;
+  const TOURS = {
+    runner:[
+      {view:'runner-login',target:'#runner-login-box',eyebrow:'01 / BELÉPÉS',title:'Csatlakozás menekülőként',text:'A játékkód az adott futamhoz tartozik, az azonosító pedig a játékos neve. Az éles változatban a rendszer ezek alapján társítja a telefont a futamhoz. A demóban a megadott névvel helyi mintajátékosként lépsz be.',tip:'Próbáld átírni az „Azonosítód” mezőt. A következő lépés csatlakoztat, de semmit nem küld el.',action:'Csatlakozás a demóhoz'},
+      {view:'runner-dashboard',target:'#r-status-card',eyebrow:'02 / ÁLLAPOT',title:'Követési állapot és GPS',text:'Itt látszik, hogy online vagy-e, melyik követési szakaszban jársz, illetve aktív-e folyamatos láthatósági büntetés. A GPS-sor ebben a fájlban szimulációt jelez; a valódi appban a böngésző helymeghatározása szolgáltatna adatot.',tip:'A „GPS / sebesség frissítése” gombbal változtasd meg a szimulált adatokat, a hivatalos jelzés külön művelet.'},
+      {view:'runner-dashboard',target:'#r-timer-panel',eyebrow:'03 / IDŐZÍTETT JEL',title:'A hivatalos helyzetjelzés időzítője',text:'A menekülő helyzete normál játékmenet közben nem folyamatosan kerül a térképre. Az intervallum lejártakor hivatalos jelzés érkezik, amely frissíti az utolsó és a következő jel időpontját. Az intervallumot a vadász állítja be.',tip:'Kattints a „Demóidő +1 perc” gombra többször, vagy küldj azonnal hivatalos helyzetjelzést a próbakonzolból.'},
+      {view:'runner-dashboard',target:'#r-proximity-panel',eyebrow:'04 / VADÁSZAKTIVITÁS',title:'Távolság és sebesség',text:'A panel a vadász becsült sebességét és a légvonalbeli távolságot mutatja, amikor ezek az adatok elérhetők. Ez nem útvonalon mért távolság. A sebesség és a távolság megjelenítését a vadász beállításai külön-külön letilthatják.',tip:'A vadász Control Roomban kapcsold ki a „Távolságok” vagy „Sebességek” opciót, majd mentsd el a beállításokat.'},
+      {view:'runner-dashboard',target:'#r-messages-panel',eyebrow:'05 / KÖZLEMÉNYEK',title:'Játékszabályok és riasztások',text:'A vadász által beállított cím, rövid leírás, szabályok és közlemény itt jelennek meg. A közlemény súlya Normál, Fontos vagy Azonnali lehet. Az éles változatban az értesítés hanggal, rendszerértesítéssel vagy rezgéssel is jelezhet, ha a környezet ezt engedi.',tip:'A vadász oldalon írj át egy közleményt, válassz súlyt, majd küldd el. A változás ezen az oldalon is látható.'},
+      {view:'runner-dashboard',target:'#runner-demo-lab',eyebrow:'06 / GYAKORLÓPULT',title:'Minden fontos művelet kipróbálható',text:'Itt azonnal küldhetsz hivatalos jelzést, frissítheted a szimulált GPS-t és sebességet, előretekerhetsz egy percet, értesítést jeleníthetsz meg, illetve mozgathatod a vadászhoz mért távolságot. A gombok valóban frissítik a képernyő állapotát.',tip:'A menekülői kör végén próbáld ki a Most Wanted státuszt és a büntetést a vadász Control Roomban.',last:true}
+    ],
+    hunter:[
+      {view:'hunter-login',target:'#hunter-login-box',eyebrow:'01 / CONTROL ROOM',title:'Belépés a vadász felületére',text:'Az éles projekt vadász PIN-t kér, utána jelenik meg az irányítópult. A fájlban tetszőleges PIN elfogadott, mert nincs szerver vagy valódi hitelesítés; a belépési folyamatot és a vezérlőfelületet lehet kipróbálni.',tip:'Írj be tetszőleges PIN-t, vagy nyomd meg a következőt a demó Control Room megnyitásához.',action:'Belépés a Control Roomba'},
+      {view:'hunter-layout',target:'#hunter-stats',eyebrow:'02 / ÁTTEKINTÉS',title:'A felső statisztikák',text:'A statisztikák megmutatják a regisztrált menekülők számát, az aktívnak tekintett játékosokat, a Most Wanted célpontot és a vadász saját sebességét. A GPS-állapot a fejléc alatt látszik.',tip:'A példában három kitalált játékos van. A nevek és számok kizárólag bemutatóadatok.'},
+      {view:'hunter-layout',target:'#hunter-settings-panel',eyebrow:'03 / JÁTÉKVEZÉRLÉS',title:'A játék beállításai',text:'Itt állítható a hivatalos jelzés percben és az élő frissítés másodpercben. A játék állapota lehet Várakozás, Élő, Szünetel vagy Lezárva; beállítható a közlemény prioritása, a cím, a leírás, a játékosoknak szóló szabály, az akcentusszín és több adatmegjelenítési kapcsoló.',tip:'Változtass meg például a címen vagy a hivatalos jelzés intervallumán, majd nyomd meg a „Beállítások mentése” gombot. A menekülői panel azonnal frissül.'},
+      {view:'hunter-layout',target:'#hunter-message-composer',eyebrow:'04 / RIASZTÁS',title:'Közlemény küldése mindenkinek',text:'Válaszd ki az üzenet súlyát, írd be a szöveget, majd küldd el. Normál, Fontos és Azonnali prioritás van. Az éles rendszerben minden menekülő a saját üzenetfolyamában kapná meg; a demó ugyanazon helyi állapotban frissíti a közleményt.',tip:'Küldd el az előre kitöltött példát, majd válts a Menekülő bemutatóra.'},
+      {view:'hunter-layout',target:'#mw-control-box',eyebrow:'05 / MOST WANTED',title:'Kiemelt célpont kiválasztása',text:'Választható az 1 perces mód (90 mp újrahasználati várakozással) vagy a 2 perces mód (150 mp újrahasználati várakozással). Egyszerre csak egy aktív célpont van. A státusz és a visszaszámlálás megmutatja, hogy szabad-e új célpontot választani.',tip:'A lista egyik játékosánál nyomd meg a „MOST WANTED BEÁLLÍTÁSA” gombot. A célpont narancs/piros kiemelést és riasztást kap.'},
+      {view:'hunter-layout',target:'#runner-list',eyebrow:'06 / MENEKÜLŐK',title:'Játékoskártyák, büntetés és státusz',text:'Minden kártyán látszik a játékos neve, az utolsó és következő hivatalos jelzése, a GPS pontossága, a célponttól mért távolság, a sebesség és a büntetés állapota. A Most Wanted megjelölhető vagy levehető, a büntetés 0–10 percre állítható.',tip:'Válassz 2 vagy 3 perc folyamatos láthatóságot egy kártyán és aktiváld. A térképi jelölő élő GPS-re vált; a Most Wanted önmagában nem teszi ezt.'},
+      {view:'hunter-layout',target:'#map-container',eyebrow:'07 / TÉRKÉP',title:'Hivatalos pont vs. élő GPS',text:'A zöld jelölő az aktív, folyamatos GPS-demót jelenti; a szürke jelölő az utolsó hivatalos pozíció; a piros kiemelés a Most Wanted célpontot jelöli. A játékban a menekülő élő koordinátái büntetés nélkül nem mozgatják a vadász térképét.',tip:'Használd a büntetést vagy a menekülői próbakonzol GPS-frissítését, hogy lásd a jelölő változását. Ez a térkép csak illusztráció.'},
+      {view:'hunter-layout',target:'#hunter-events',eyebrow:'08 / NAPLÓ ÉS RESET',title:'Eseménynapló és teljes újraindítás',text:'Az eseménynapló rögzíti a demóban elvégzett fő műveleteket: belépés, hivatalos jelzés, közlemény, beállításmentés, Most Wanted és büntetés. A teljes reset visszaállítja az alapbeállításokat, törli a célpontot és a büntetést, majd a játékot várakozó állapotba teszi.',tip:'Próbáld ki a resetet a lista alján. A visszaállítás csak ezt a helyi demót érinti.',last:true}
+    ]
+  };
+
+  function makeInitialGame(){
+    const now=new Date();
+    return {
+      settings:{...DEFAULTS}, joined:false, runnerName:'Alex', gameCode:'MW-2026', countdown:20*60, lastSignal:null,
+      runnerSpeed:12.4, hunterDistance:4.82, hunterSpeed:34.2, hunterGps:true, ownGps:true, gpsAccuracy:8,
+      wantedRunnerId:null, wantedState:'ready', wantedRemaining:0, cooldownRemaining:0, penaltyEnabled:true,
+      announcement:DEFAULTS.announcement, announcementPriority:DEFAULTS.announcementPriority,
+      runners:[
+        {id:1,name:'Alex',x:320,y:430,lastAt:null,nextAt:new Date(now.getTime()+20*60000),accuracy:8,speed:12.4,penaltyRemaining:0,penaltyMinutes:0,liveX:340,liveY:438},
+        {id:2,name:'Nóra',x:690,y:315,lastAt:new Date(now.getTime()-4*60000),nextAt:new Date(now.getTime()+16*60000),accuracy:14,speed:0,penaltyRemaining:0,penaltyMinutes:0,liveX:710,liveY:327},
+        {id:3,name:'Márk',x:520,y:690,lastAt:new Date(now.getTime()-7*60000),nextAt:new Date(now.getTime()+13*60000),accuracy:11,speed:0,penaltyRemaining:0,penaltyMinutes:0,liveX:536,liveY:702}
+      ], events:[]
+    };
+  }
+  function resetState(){
+    game=makeInitialGame(); countdownSeconds=game.countdown; hunterDistance=game.hunterDistance; hunterSpeed=game.hunterSpeed; runnerSpeed=game.runnerSpeed;
+    document.body.classList.remove('runner-most-wanted'); document.documentElement.style.setProperty('--accent',DEFAULTS.accent);
+    $('#set-interval').value=DEFAULTS.locationInterval; $('#set-live-interval').value=DEFAULTS.liveInterval; $('#set-status').value=DEFAULTS.gameStatus;
+    $('#set-priority').value=DEFAULTS.announcementPriority; $('#set-accent').value=DEFAULTS.accent; $('#set-title').value=DEFAULTS.title;
+    $('#set-description').value=DEFAULTS.description; $('#set-instructions').value=DEFAULTS.instructions; $('#set-announcement').value=DEFAULTS.announcement;
+    $('#set-distance').checked=true; $('#set-speed').checked=true; $('#set-alerts').checked=true; $('#set-accuracy').checked=true; $('#set-penalty-enabled').checked=true; $('#set-mw-mode').value='1m';
+    $('#game-code').value='MW-2026'; $('#runner-name').value='Alex'; $('#hunter-pin').value=''; $('#global-msg').value='Figyelem! A hajsza hamarosan elindul.'; $('#message-priority').value='important';
+    $('#r-announcement').textContent=game.announcement; $('#r-announcement-card').className='announcement-card priority-important';
+    addEvent('A demóállapot alaphelyzetbe állt.'); renderAll(); showToast('A demó visszaállt az alapbeállításokra.');
+  }
+  function setView(view){
+    currentView=view;
+    const ids=['welcome-view','runner-login-view','runner-dashboard-view','hunter-login-view','hunter-layout'];
+    const visible={'welcome':'welcome-view','runner-login':'runner-login-view','runner-dashboard':'runner-dashboard-view','hunter-login':'hunter-login-view','hunter-layout':'hunter-layout'}[view];
+    ids.forEach(id=>{const el=document.getElementById(id); if(el)el.style.display=id===visible?(id==='hunter-layout'?'grid':'block'):'none';});
+    if(view!=='runner-dashboard')document.body.classList.remove('runner-most-wanted'); else updateRunnerTheme();
+    clearSpotlight();
+    if(view==='hunter-layout')renderAll();
+    if(view==='runner-dashboard')renderRunner();
+  }
+  function showWelcome(){tourIsActive=false;tourRole=null;tourWasClosed=false;$('#tour-panel').hidden=true;$('#tour-open').classList.remove('visible');clearSpotlight();setView('welcome');}
+  function startRunnerTour(){currentRole='runner';tourRole='runner';tourStep=0;tourIsActive=true;tourWasClosed=false;$('#tour-panel').hidden=false;$('#tour-open').classList.remove('visible');setView('runner-login');renderTour();}
+  function startHunterTour(){currentRole='hunter';tourRole='hunter';tourStep=0;tourIsActive=true;tourWasClosed=false;$('#tour-panel').hidden=false;$('#tour-open').classList.remove('visible');setView('hunter-login');renderTour();}
+  function reopenGuide(){
+    if(!currentRole){startRunnerTour();return;}
+    if(!tourRole||tourRole!==currentRole){tourRole=currentRole;tourStep=(currentRole==='runner'&&game.joined)?1:0;}
+    if(!tourIsActive){tourIsActive=true;tourWasClosed=false;$('#tour-panel').hidden=false;$('#tour-open').classList.remove('visible');}
+    renderTour();
+  }
+  function closeGuide(){tourIsActive=false;tourWasClosed=true;$('#tour-panel').hidden=true;$('#tour-open').classList.add('visible');clearSpotlight();}
+  function clearSpotlight(){$$('.spotlight').forEach(el=>el.classList.remove('spotlight'));}
+  function renderTour(){
+    if(!tourIsActive||!tourRole)return;
+    const steps=TOURS[tourRole]; tourStep=Math.max(0,Math.min(tourStep,steps.length-1)); const step=steps[tourStep];
+    if(currentView!==step.view)setView(step.view);
+    clearSpotlight(); const target=$(step.target); if(target){target.classList.add('spotlight');setTimeout(()=>{if(target.isConnected)target.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});},60);}
+    $('#tour-step-count').textContent=`${tourStep+1} / ${steps.length}`; $('#tour-progress-fill').style.width=`${((tourStep+1)/steps.length)*100}%`;
+    $('#tour-eyebrow').textContent=step.eyebrow; $('#tour-title').textContent=step.title; $('#tour-text').textContent=step.text; $('#tour-tip').textContent=step.tip;
+    $('#tour-prev').disabled=tourStep===0;
+    $('#tour-next').textContent=step.action||(step.last?'Befejezés ✓':'Következő →');
+  }
+  function nextTourStep(){
+    if(!tourRole||!tourIsActive)return;
+    const steps=TOURS[tourRole], step=steps[tourStep];
+    if(tourRole==='runner'&&tourStep===0){joinGame(true);return;}
+    if(tourRole==='hunter'&&tourStep===0){loginHunter(true);return;}
+    if(tourStep>=steps.length-1){closeGuide();showToast('Végigértél az útmutatón. A demó funkciói továbbra is kipróbálhatók.');return;}
+    tourStep++;renderTour();
+  }
+  function previousTourStep(){if(!tourRole||!tourIsActive||tourStep===0)return;tourStep--;renderTour();}
+  function joinGame(fromTour=false){
+    const code=$('#game-code').value.trim(), name=$('#runner-name').value.trim();
+    if(!code||!name){$('#runner-login-error').classList.add('visible');return;}
+    $('#runner-login-error').classList.remove('visible'); game.gameCode=code; game.runnerName=name.slice(0,32); game.joined=true;
+    game.runners[0].name=game.runnerName; game.runners[0].lastAt=game.runners[0].lastAt||null; game.runners[0].nextAt=new Date(Date.now()+countdownSeconds*1000);
+    addEvent(`${game.runnerName} csatlakozott a demófutamhoz.`);setView('runner-dashboard');renderAll();showToast(`${game.runnerName} csatlakozott a helyi demóhoz.`);
+    if(tourRole==='runner'&&tourIsActive&&tourStep===0){tourStep=1;renderTour();}
+  }
+  function loginHunter(fromTour=false){currentRole='hunter';$('#hunter-layout').style.display='grid';setView('hunter-layout');addEvent('A vadász megnyitotta a Control Room demót.');showToast('Control Room megnyitva. A PIN nem kerül ellenőrzésre.');if(tourRole==='hunter'&&tourIsActive&&tourStep===0){tourStep=1;renderTour();}}
+  function leaveGame(){game.joined=false;addEvent(`${game.runnerName} kilépett a menekülői nézetből.`);currentRole=null;showWelcome();showToast('Kiléptél a demó menekülői felületéről.');}
+  function statusLabel(status){return ({waiting:'VÁRAKOZÁS',live:'JÁTÉK ÉLŐ',paused:'SZÜNETEL',finished:'LEZÁRVA'})[status]||'JÁTÉK ÉLŐ';}
+  function updateRunnerTheme(){const isWanted=currentView==='runner-dashboard'&&game.wantedRunnerId===1&&game.wantedState==='active';document.body.classList.toggle('runner-most-wanted',isWanted);}
+  function updateRunner(){
+    $('#r-name').textContent=game.runnerName.toUpperCase();$('#r-game-title').textContent=game.settings.title;$('#r-game-description').textContent=game.settings.description;
+    $('#r-game-status').textContent=statusLabel(game.settings.gameStatus);$('#r-instructions').textContent=game.settings.instructions;
+    $('#r-interval').textContent=`${game.settings.locationInterval} perc`;$('#countdown').textContent=fmtCountdown(countdownSeconds);
+    $('#r-last').textContent=game.lastSignal?fmtShortTime(game.lastSignal):'--:--:--';$('#r-next').textContent=fmtShortTime(new Date(Date.now()+countdownSeconds*1000));
+    const activeWanted=game.wantedRunnerId===1&&game.wantedState==='active';
+    const activePenalty=game.runners[0].penaltyRemaining>0&&game.settings.penaltyEnabled;
+    $('#r-status').textContent=activeWanted?'MOST WANTED':activePenalty?'FOLYAMATOS LÁTHATÓSÁG':(game.settings.gameStatus==='paused'?'SZÜNETEL':game.settings.gameStatus==='finished'?'LEZÁRVA':'IDŐZÍTETT');
+    $('#r-status-detail').textContent=activeWanted?'Kiemelt célpont vagy. A vadász élő sebesség- és távolságadatokat lát; a térképi helyzet továbbra is az időzített jelzésekhez kötött.':activePenalty?'Aktív büntetés: a szimulált helyzeted folyamatosan frissül a vadász térképén.':'A hivatalos helyzetjelzés az időzítő lejártakor indul.';
+    $('#r-live-pill').textContent=activeWanted?'MOST WANTED':activePenalty?'ÉLŐ GPS':'ONLINE';$('#r-penalty').textContent=activePenalty?`FOLYAMATOS LÁTHATÓSÁG · ${fmtCountdown(game.runners[0].penaltyRemaining)}`:'IDŐZÍTETT KÖVETÉS';$('#r-penalty').classList.toggle('active',activePenalty);
+    $('#r-gps').textContent=`GPS DEMÓ: AKTÍV · ±${game.gpsAccuracy} m`;
+    $('#r-own-speed').textContent=game.settings.speedEnabled?`${runnerSpeed.toFixed(1).replace('.',',')} km/h`:'Nem elérhető';
+    $('#r-hunter-distance').textContent=game.settings.distanceEnabled?`${hunterDistance.toFixed(2).replace('.',',')} km`:'Nem elérhető';
+    $('#r-hunter-speed').textContent=game.settings.speedEnabled?`${hunterSpeed.toFixed(1).replace('.',',')} km/h`:'Nem elérhető';
+    $('#r-hunter-updated').textContent=game.hunterGps?`A vadász utolsó szimulált adata: ${fmtClock()}`:'A vadász GPS-e még nem aktív.';
+    $('#r-announcement').textContent=game.announcement||'Nincs új közlemény.';$('#r-announcement-card').className=`announcement-card priority-${game.announcementPriority}`;
+    $('#runner-demo-status').textContent=game.joined?'CSATLAKOZVA':'ELŐNÉZET';updateRunnerTheme();
+  }
+  function updateHunter(refreshContent=true){
+    $('#stat-runners').textContent=game.runners.length;$('#stat-active').textContent=game.runners.length;const target=game.runners.find(r=>r.id===game.wantedRunnerId&&game.wantedState==='active');$('#stat-wanted').textContent=target?target.name:'—';$('#stat-hunter-speed').textContent=game.hunterGps?`${hunterSpeed.toFixed(1).replace('.',',')}`:'—';$('#hunter-gps-status').textContent=game.hunterGps?`VADÁSZ GPS: DEMÓ AKTÍV · ±${game.gpsAccuracy} m`:'VADÁSZ GPS: NEM AKTÍV';
+    const state=$('#most-wanted-control-state'),help=$('#most-wanted-control-help');
+    if(game.wantedState==='active'){state.className='mw-control-state active';state.textContent='AKTÍV';help.textContent=`${target?target.name:'Célpont'} · hátra ${fmtCountdown(game.wantedRemaining)}`;}
+    else if(game.wantedState==='cooldown'){state.className='mw-control-state cooldown';state.textContent='COOLDOWN';help.textContent=`Új Most Wanted ${fmtCountdown(game.cooldownRemaining)} múlva.`;}
+    else{state.className='mw-control-state ready';state.textContent='KÉSZ';help.textContent='Válaszd ki a taktikát, majd jelölj ki egyetlen célpontot.';}
+    $('#set-mw-mode').disabled=game.wantedState!=='ready';
+    if(refreshContent){renderRunnerList();renderMap();renderEvents();} else updatePenaltyLabels();
+  }
+  function updatePenaltyLabels(){game.runners.forEach(r=>{const card=$(`[data-runner-id="${r.id}"]`);if(!card)return;const value=card.querySelector('.runner-card-grid span:last-child b');if(!value)return;const penalty=r.penaltyRemaining>0&&game.settings.penaltyEnabled;value.textContent=penalty?`Élő követés ${fmtCountdown(r.penaltyRemaining)}-ig`:'Büntetés nincs aktív';});}
+  function renderRunner(){updateRunner();}
+  function renderRunnerList(){
+    const el=$('#runner-list');el.innerHTML=game.runners.map(r=>{
+      const wanted=game.wantedRunnerId===r.id&&game.wantedState==='active';const penalty=r.penaltyRemaining>0&&game.settings.penaltyEnabled;const canChoose=game.wantedState==='ready';
+      const distance=wanted&&game.settings.distanceEnabled?`${hunterDistance.toFixed(2).replace('.',',')} km`:'—';const speed=wanted&&game.settings.speedEnabled?`${r.speed.toFixed(1).replace('.',',')} km/h`:(wanted?'—':'Rejtett');
+      const last=r.lastAt?fmtShortTime(r.lastAt):'Még nem küldött';const next=fmtShortTime(r.nextAt||new Date(Date.now()+game.settings.locationInterval*60000));
+      return `<article data-runner-id="${r.id}" class="runner-card ${penalty?'active':(r.lastAt?'active':'late')} ${wanted?'most-wanted':''}"><div class="runner-card-title"><strong>${esc(r.name)} ${wanted?'<span class="mw-badge">MOST WANTED</span>':''}</strong><span class="runner-state ${r.lastAt?'':'late'}">${r.lastAt?'AKTÍV':'VÁRAKOZIK'}</span></div><div class="runner-live-line"><span class="${penalty?'live-dot':wanted?'live-dot':'muted-dot'}"></span>${penalty?'ÉLŐ GPS HELYZET':wanted?'ÉLŐ MÉRT ADAT':'UTOLSÓ HIVATALOS JEL'} · ${last}</div><div class="runner-card-grid"><span>Legutóbbi jel<b>${last}</b></span><span>Következő jel<b>${next}</b></span><span>Pontosság<b>±${r.accuracy} m</b></span><span>Távolság a vadásztól<b>${distance}</b></span><span>Sebesség<b>${speed}</b></span><span>Állapot<b>${penalty?`Élő követés ${fmtCountdown(r.penaltyRemaining)}-ig`:'Büntetés nincs aktív'}</b></span></div><div class="demo-runner-actions">${wanted?`<button class="small-button danger" onclick="setMostWanted(null)">CÉLPONT LEVÉTELE</button>`:`<button class="small-button" onclick="setMostWanted(${r.id})" ${canChoose?'':'disabled'}>MOST WANTED BEÁLLÍTÁSA</button>`}<select id="penalty-${r.id}" aria-label="${esc(r.name)} büntetése" ${game.settings.penaltyEnabled?'':'disabled'}><option value="0">Nincs büntetés</option>${[1,2,3,4,5,6,7,8,9,10].map(m=>`<option value="${m}" ${r.penaltyMinutes===m?'selected':''}>${m} perc folyamatos láthatóság</option>`).join('')}</select><button class="small-button secondary" onclick="setPenalty(${r.id})" ${game.settings.penaltyEnabled?'':'disabled'}>BÜNTETÉS AKTIVÁLÁSA</button></div></article>`;
+    }).join('');
+  }
+  function renderMap(){
+    const layer=$('#map-marker-layer');if(!layer)return;
+    layer.innerHTML=game.runners.map(r=>{
+      const wanted=game.wantedRunnerId===r.id&&game.wantedState==='active',penalty=r.penaltyRemaining>0&&game.settings.penaltyEnabled;const x=penalty?r.liveX:r.x,y=penalty?r.liveY:r.y;const color=wanted?'wanted':penalty?'live':'normal';
+      return `<g transform="translate(${x} ${y})"><circle class="map-dot ${color}" r="${wanted?13:10}" cx="0" cy="0"/>${wanted?'<circle class="map-pulse" r="23" cx="0" cy="0"/>':''}<text class="map-pin-label" x="18" y="-7">${esc(r.name)}</text><text class="map-pin-sub" x="18" y="10">${penalty?'ÉLŐ GPS':wanted?'MOST WANTED':'HIVATALOS JEL'}</text></g>`;
+    }).join('');
+  }
+  function renderEvents(){const el=$('#event-log');el.innerHTML='<p class="eyebrow">ESEMÉNYNAPLÓ</p>'+(game.events.length?game.events.slice(0,12).map(e=>`<div><time>${esc(e.time)}</time> ${esc(e.text)}</div>`).join(''):'<div>Még nincs esemény.</div>');}
+  function renderAll(){updateRunner();updateHunter();}
+  function addEvent(text){game.events.unshift({time:fmtClock(),text});game.events=game.events.slice(0,30);if($('#event-log'))renderEvents();}
+  function showToast(message,priority='normal'){
+    const stack=$('#demo-toast-stack'),toast=document.createElement('div');toast.className=`demo-toast ${priority}`;toast.textContent=message;stack.appendChild(toast);setTimeout(()=>{toast.style.opacity='0';toast.style.transform='translateY(-5px)';setTimeout(()=>toast.remove(),220);},3600);
+  }
+  function sendOfficialSignal(){
+    const now=new Date();game.lastSignal=now;countdownSeconds=game.settings.locationInterval*60;game.runners[0].lastAt=now;game.runners[0].nextAt=new Date(now.getTime()+countdownSeconds*1000);game.runners[0].x=Math.max(100,Math.min(900,game.runners[0].x+(Math.random()*36-18)));game.runners[0].y=Math.max(100,Math.min(790,game.runners[0].y+(Math.random()*36-18)));
+    $('#countdown').classList.remove('late');addEvent(`${game.runnerName}: hivatalos helyzetjelzés elküldve (demó).`);renderAll();showToast('A hivatalos helyzetjelzés frissült a demóban.');
+  }
+  function simulateRunnerGps(){
+    runnerSpeed=Math.max(0,Math.min(55,runnerSpeed+(Math.random()*9-4.5)));game.runnerSpeed=runnerSpeed;game.gpsAccuracy=game.settings.accuracyEnabled?Math.floor(5+Math.random()*11):Math.floor(20+Math.random()*35);
+    game.runners[0].speed=runnerSpeed;game.runners[0].liveX=Math.max(100,Math.min(900,game.runners[0].liveX+(Math.random()*40-20)));game.runners[0].liveY=Math.max(100,Math.min(790,game.runners[0].liveY+(Math.random()*40-20)));
+    addEvent(`Szimulált GPS-adat frissült · ${runnerSpeed.toFixed(1)} km/h · ±${game.gpsAccuracy} m.`);renderAll();showToast('A szimulált GPS és sebesség frissült.');
+  }
+  function moveHunterCloser(){hunterDistance=Math.max(.1,Math.min(12,hunterDistance+(Math.random()>.52?-.85:.65)));hunterSpeed=Math.max(0,Math.min(85,hunterSpeed+(Math.random()*12-6)));game.hunterDistance=hunterDistance;game.hunterSpeed=hunterSpeed;addEvent(`Vadász demóadat frissült · ${hunterDistance.toFixed(2)} km · ${hunterSpeed.toFixed(1)} km/h.`);renderAll();showToast('A vadász távolság- és sebességadata megváltozott.');}
+  function advanceDemoMinute(){
+    countdownSeconds=Math.max(0,countdownSeconds-60);
+    if(game.wantedState==='active'){game.wantedRemaining=Math.max(0,game.wantedRemaining-60);if(game.wantedRemaining===0){game.wantedState='cooldown';game.cooldownRemaining=game.settings.mwMode==='2m'?150:90;const prev=game.runners.find(r=>r.id===game.wantedRunnerId);game.wantedRunnerId=null;addEvent(`Most Wanted időtartama lejárt${prev?`: ${prev.name}`:''}; cooldown indult.`);showToast('A Most Wanted szakasz lejárt; cooldown aktív.','important');}}
+    else if(game.wantedState==='cooldown'){game.cooldownRemaining=Math.max(0,game.cooldownRemaining-60);if(game.cooldownRemaining===0){game.wantedState='ready';addEvent('Most Wanted ismét használható.');}}
+    game.runners.forEach(r=>{if(r.penaltyRemaining>0){r.penaltyRemaining=Math.max(0,r.penaltyRemaining-60);if(r.penaltyRemaining===0){r.penaltyMinutes=0;addEvent(`${r.name}: a folyamatos láthatósági büntetés lejárt.`);}}});
+    if(countdownSeconds===0)sendOfficialSignal();else renderAll();showToast('A demóidő 1 perccel előrébb lépett.');
+  }
+  function demoRunnerNotice(){const samples=[['A vadászok közelednek. Figyeld a hivatalos időzítőt!','important'],['AZONNALI RIASZTÁS: Most Wanted státusz aktiválódott.','urgent'],['A játék állapota frissült. Nézd meg a közleményeket!','normal']];const item=samples[Math.floor(Math.random()*samples.length)];game.announcement=item[0];game.announcementPriority=item[1];renderAll();if(game.settings.alertsEnabled)showToast(item[0],item[1]);addEvent('Próbaértesítés megjelenítve.');}
+  function updateSettings(){
+    const interval=Math.round(Number($('#set-interval').value)),live=Math.round(Number($('#set-live-interval').value));
+    if(!Number.isFinite(interval)||interval<1||interval>1440){showToast('A hivatalos jelzés intervalluma 1 és 1440 perc között lehet.','urgent');$('#set-interval').focus();return;}
+    if(!Number.isFinite(live)||live<1||live>10){showToast('Az élő frissítés 1 és 10 másodperc közötti érték lehet.','urgent');$('#set-live-interval').focus();return;}
+    const oldAnnouncement=game.announcement;
+    game.settings={locationInterval:interval,liveInterval:live,gameStatus:$('#set-status').value,announcementPriority:$('#set-priority').value,accent:$('#set-accent').value,title:$('#set-title').value.trim()||DEFAULTS.title,description:$('#set-description').value.trim(),instructions:$('#set-instructions').value.trim(),announcement:$('#set-announcement').value.trim(),distanceEnabled:$('#set-distance').checked,speedEnabled:$('#set-speed').checked,alertsEnabled:$('#set-alerts').checked,accuracyEnabled:$('#set-accuracy').checked,penaltyEnabled:$('#set-penalty-enabled').checked,mwMode:$('#set-mw-mode').value};
+    game.announcement=game.settings.announcement;game.announcementPriority=game.settings.announcementPriority;game.penaltyEnabled=game.settings.penaltyEnabled;document.documentElement.style.setProperty('--accent',game.settings.accent);countdownSeconds=interval*60;game.runners[0].nextAt=new Date(Date.now()+countdownSeconds*1000);
+    if(!game.settings.penaltyEnabled)game.runners.forEach(r=>{r.penaltyRemaining=0;r.penaltyMinutes=0;});
+    addEvent(`Játékbeállítások mentve · jelzés ${interval} perc · élő frissítés ${live} mp.`);renderAll();showToast('Beállítások elmentve a helyi demóba.');
+    if(game.settings.alertsEnabled&&oldAnnouncement!==game.announcement&&game.announcement)showToast(game.announcement,game.announcementPriority);
+  }
+  function sendGlobalMsg(){const input=$('#global-msg'),message=input.value.trim();if(!message){showToast('Előbb írj be egy üzenetet.','urgent');input.focus();return;}game.announcement=message;game.announcementPriority=$('#message-priority').value;addEvent(`Közlemény elküldve · ${game.announcementPriority.toUpperCase()}.`);renderAll();if(game.settings.alertsEnabled)showToast(message,game.announcementPriority);}
+  function setMostWanted(id){
+    if(id===null){if(game.wantedState==='active'){const old=game.runners.find(r=>r.id===game.wantedRunnerId);game.wantedRunnerId=null;game.wantedState='cooldown';game.cooldownRemaining=game.settings.mwMode==='2m'?150:90;addEvent(`Most Wanted célpont levéve${old?`: ${old.name}`:''}; cooldown indult.`);showToast('Célpont levéve. Az újrahasználati cooldown elindult.','important');renderAll();}return;}
+    if(game.wantedState!=='ready'){showToast('Most Wanted nem aktiválható: aktív célpont vagy cooldown van.','urgent');return;}
+    const r=game.runners.find(p=>p.id===id);if(!r)return;
+    game.wantedRunnerId=id;game.wantedState='active';game.wantedRemaining=game.settings.mwMode==='2m'?120:60;
+    addEvent(`${r.name} MOST WANTED célpont lett (${game.settings.mwMode==='2m'?'2':'1'} perc).`);
+    if(id===1){game.announcement=`MOST WANTED lettél. ${game.settings.mwMode==='2m'?'2':'1'} percig kiemelt célpont vagy. A vadász élőben látja a sebességedet és a légvonalbeli távolságodat; a térképi helyzeted továbbra is a hivatalos jelzéskor frissül.`;game.announcementPriority='urgent';if(game.settings.alertsEnabled)showToast('MOST WANTED státusz: a vadász kiemelten keres.','urgent');}
+    renderAll();showToast(`${r.name} Most Wanted célpont lett.`);
+  }
+  function setPenalty(id){
+    if(!game.settings.penaltyEnabled){showToast('A büntetés mód jelenleg ki van kapcsolva.','urgent');return;}
+    const select=$(`#penalty-${id}`);if(!select)return;const minutes=Number(select.value);const r=game.runners.find(p=>p.id===id);if(!r)return;r.penaltyMinutes=minutes;r.penaltyRemaining=minutes*60;
+    if(minutes>0){addEvent(`${r.name} ${minutes} perces folyamatos láthatósági büntetést kapott.`);if(id===1){game.announcement=`Büntetést kaptál: ${minutes} percig folyamatosan látható a szimulált helyzeted a vadász számára.`;game.announcementPriority='urgent';}showToast(`A folyamatos láthatóság ${minutes} percre aktív.`,'important');}
+    else{addEvent(`${r.name} folyamatos láthatósági büntetése törölve.`);showToast('A büntetés törölve.');}
+    renderAll();
+  }
+  function resetGame(){resetState();addEvent('Teljes játék reset végrehajtva.');renderAll();}
+  function tick(){
+    $('#runner-clock').textContent=fmtClock();$('#hunter-clock').textContent=fmtClock();
+    if(countdownSeconds>0)countdownSeconds--;
+    let refreshHunterContent=false;
+    if(game.wantedState==='active'&&game.wantedRemaining>0){game.wantedRemaining--;if(game.wantedRemaining===0){const prev=game.runners.find(r=>r.id===game.wantedRunnerId);game.wantedRunnerId=null;game.wantedState='cooldown';game.cooldownRemaining=game.settings.mwMode==='2m'?150:90;addEvent(`Most Wanted lejárt${prev?`: ${prev.name}`:''}; cooldown aktív.`);refreshHunterContent=true;}}
+    else if(game.wantedState==='cooldown'&&game.cooldownRemaining>0){game.cooldownRemaining--;if(game.cooldownRemaining===0){game.wantedState='ready';addEvent('Most Wanted ismét használható.');refreshHunterContent=true;}}
+    game.runners.forEach(r=>{if(r.penaltyRemaining>0){r.penaltyRemaining--;if(r.penaltyRemaining===0){r.penaltyMinutes=0;addEvent(`${r.name}: büntetés lejárt.`);refreshHunterContent=true;}}});
+    if(countdownSeconds===0){sendOfficialSignal();return;}
+    if(currentView==='runner-dashboard')updateRunner();if(currentView==='hunter-layout')updateHunter(refreshHunterContent);
+  }
+  // Initialize UI and start a small local-only clock loop.
+  resetState();game.events=[];renderAll();setInterval(tick,1000);
+  </script>
+</body>
+</html>
